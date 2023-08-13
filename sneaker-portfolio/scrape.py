@@ -57,3 +57,5 @@ def get_search_json(shoe_name):
             sneakers.append(sneaker_info)
             
     return sneakers
+
+print(get_search_json("travis"))

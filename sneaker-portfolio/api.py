@@ -7,7 +7,7 @@ from starlette.responses import Response
 from fastapi.staticfiles import StaticFiles
 from main import get_angle_images_from_original_image, make_gif
 import threading
-
+from scrape import get_search_json
 app = FastAPI()
 
 DATABASE_PATH = "test.db"
@@ -97,14 +97,37 @@ async def get_user_portfolio(user_id: int):
         cursor.execute("""
             SELECT
                 p.shoe_size, p.favorite,
-                s.name, s.stylecode, s.model, s.colorway, s.color, s.release_date,
-                s.retail_price, s.extras, s.link, s.image, s.description
+                s.name, s.title, s.model, s.brand, s.urlKey,
+                s.thumbUrl, s.smallImageUrl, s.imageUrl,
+                s.description, s.retail_price, s.release_date,
+                s.created_at
             FROM portfolios p
             JOIN shoes s ON p.shoe_id = s.id
             WHERE p.user_id = ?
         """, (user_id,))
         results = cursor.fetchall()
-        return [{"shoe_size": r[0], "favorite": r[1], "name": r[2], "stylecode": r[3], "model": r[4], "colorway": r[5], "color": r[6], "release_date": r[7], "retail_price": r[8], "extras": r[9], "link": r[10], "image": r[11], "description": r[12]} for r in results]
+        return [
+            {
+                "shoe_size": r[0],
+                "favorite": r[1],
+                "name": r[2],
+                "title": r[3],
+                "model": r[4],
+                "brand": r[5],
+                "urlKey": r[6],
+                "thumbUrl": r[7],
+                "smallImageUrl": r[8],
+                "imageUrl": r[9],
+                "description": r[10],
+                "retail_price": r[11],
+                "release_date": r[12],
+                "created_at": r[13]
+            }
+            for r in results
+        ]
 
+@app.get("/search/name/{name}")
+def get_name_json(name: str):
     
+    return get_search_json(name)
     
