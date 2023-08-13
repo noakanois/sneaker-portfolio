@@ -60,4 +60,3 @@ def get_search_json(shoe_name):
             
     return sneakers
 
-print(get_search_json("Fragment Jordan"))
