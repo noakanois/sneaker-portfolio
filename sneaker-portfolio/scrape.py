@@ -51,11 +51,11 @@ def get_search_json(shoe_name):
                 "smallImageUrl": node["media"]["smallImageUrl"],
                 "imageUrl": node["media"]["smallImageUrl"].split("?fit")[0],
                 "description": node["description"],
+                "retailPrice": 0,
+                "releaseDate": ""
             }
             for trait in node["productTraits"]:
                 sneaker_info[trait["name"]] = trait["value"]
             sneakers.append(sneaker_info)
             
     return sneakers
-
-print(get_search_json("travis"))

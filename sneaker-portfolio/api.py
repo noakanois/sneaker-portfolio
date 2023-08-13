@@ -6,7 +6,7 @@ from fastapi import Request, HTTPException
 from starlette.responses import Response
 from fastapi.staticfiles import StaticFiles
 from main import get_angle_images_from_original_image, make_gif
-import threading
+import datetime
 from scrape import get_search_json
 app = FastAPI()
 
@@ -128,6 +128,85 @@ async def get_user_portfolio(user_id: int):
 
 @app.get("/search/name/{name}")
 def get_name_json(name: str):
+    search_results = get_search_json(name)  # Assuming this function retrieves search results
+
+    with sqlite3.connect(DATABASE_PATH) as conn:
+        cursor = conn.cursor()
+
+        # Insert the search results into the database
+        for result in search_results:
+            cursor.execute("""
+                INSERT OR REPLACE INTO shoes (name, title, model, brand, urlKey, thumbUrl, smallImageUrl, imageUrl,
+                                  description, retail_price, release_date, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                result["name"],
+                result["title"],
+                result["model"],
+                result["brand"],
+                result["urlKey"],
+                result["thumbUrl"],
+                result["smallImageUrl"],
+                result["imageUrl"],
+                result["description"],
+                result["retailPrice"],
+                result["releaseDate"],
+                datetime.datetime.now()
+            ))
+
+        conn.commit()  # Commit the changes to the database
+
+    return search_results
+
+from pydantic import BaseModel
+
+class AddShoeToPortfolio(BaseModel):
+    userId: int
+    shoeTitle: str
+    shoeSize: float
     
-    return get_search_json(name)
-    
+@app.post("/user/addToPortfolio")
+async def add_shoe_to_portfolio(shoe_data: AddShoeToPortfolio):
+    user_id = shoe_data.userId
+    shoe_title = shoe_data.shoeTitle
+    shoe_size = shoe_data.shoeSize
+
+    # Find the shoe ID based on the shoe title (assuming title is unique for simplification)
+    with sqlite3.connect(DATABASE_PATH) as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT id FROM shoes WHERE title = ?", (shoe_title,))
+        shoe_id = cursor.fetchone()
+
+        # If shoe is not found, return an error
+        if not shoe_id:
+            raise HTTPException(status_code=400, detail="Shoe not found")
+
+        # Add to the portfolio
+        cursor.execute("INSERT INTO portfolios (user_id, shoe_id, shoe_size) VALUES (?, ?, ?)",
+                       (user_id, shoe_id[0], shoe_size))
+        conn.commit()
+
+    return {"status": "success", "message": "Shoe added to portfolio successfully!"}
+
+@app.delete("/user/{user_id}/portfolio/{urlKey}")
+async def delete_shoe_from_portfolio(user_id: int, urlKey: str):
+    with sqlite3.connect(DATABASE_PATH) as conn:
+        cursor = conn.cursor()
+        
+        cursor.execute("SELECT id FROM shoes WHERE urlKey = ?", (urlKey,))
+        shoe = cursor.fetchone()
+        
+        if not shoe:
+            raise HTTPException(status_code=404, detail="Shoe not found")
+
+        shoe_id = shoe[0]
+        
+        cursor.execute("""
+            DELETE FROM portfolios WHERE user_id = ? AND shoe_id = ?
+        """, (user_id, shoe_id))
+        conn.commit()
+        
+        if cursor.rowcount == 0:
+            raise HTTPException(status_code=404, detail="Entry not found in portfolio")
+
+    return {"status": "success", "message": "Shoe removed from portfolio successfully!"}
