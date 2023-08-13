@@ -59,28 +59,27 @@ async def startup_db():
         if is_table_empty(table_name):
             execute_sql_file(sql_file)
     
-    with sqlite3.connect(DATABASE_PATH) as conn:
-        cursor = conn.cursor()
-        cursor.execute("SELECT stylecode, image FROM shoes")
-        results = cursor.fetchall()
+    # with sqlite3.connect(DATABASE_PATH) as conn:
+    #     cursor = conn.cursor()
+    #     cursor.execute("SELECT stylecode, image FROM shoes")
+    #     results = cursor.fetchall()
         
     
-    threads = []
+    # threads = []
+
+    # def process_shoe(style_code, image_url):
+    #     get_angle_images_from_original_image(image_url, style_code)
+    #     make_gif(image_url, style_code)
 
 
-    def process_shoe(style_code, image_url):
-        get_angle_images_from_original_image(image_url, style_code)
-        make_gif(image_url, style_code)
-
-
-    for r in results:
-        style_code, image_url = r
-        t = threading.Thread(target=process_shoe, args=(style_code, image_url))
-        threads.append(t)
-        t.start()
+    # for r in results:
+    #     style_code, image_url = r
+    #     t = threading.Thread(target=process_shoe, args=(style_code, image_url))
+    #     threads.append(t)
+    #     t.start()
         
-    for t in threads:
-        t.join()
+    # for t in threads:
+    #     t.join()
         
     
 @app.get("/users")
