@@ -4,6 +4,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi import Request, HTTPException
 from starlette.responses import Response
+from fastapi.staticfiles import StaticFiles
+from main import get_angle_images_from_original_image, make_gif
+import threading
 
 app = FastAPI()
 
@@ -19,6 +22,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.mount("/data", StaticFiles(directory="data"), name="data")
 
 @app.get("/")
 async def root():
@@ -53,6 +57,29 @@ async def startup_db():
     for sql_file, table_name in zip(run_if_empty_files, tables):
         if is_table_empty(table_name):
             execute_sql_file(sql_file)
+    
+    with sqlite3.connect(DATABASE_PATH) as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT stylecode, image FROM shoes")
+        results = cursor.fetchall()
+        
+    
+    threads = []
+
+
+    def process_shoe(style_code, image_url):
+        get_angle_images_from_original_image(image_url, style_code)
+        make_gif(image_url, style_code)
+
+
+    for r in results:
+        style_code, image_url = r
+        t = threading.Thread(target=process_shoe, args=(style_code, image_url))
+        threads.append(t)
+        t.start()
+        
+    for t in threads:
+        t.join()
         
     
 @app.get("/users")
