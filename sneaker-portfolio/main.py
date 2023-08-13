@@ -5,12 +5,10 @@ import requests
 import shutil
 from PIL import Image
 
-# Constants
 PROJECT_PATH = os.path.join(".", "data")
 NUM_IMAGES = 36
 MAX_WIDTH = 1200
 
-# Logger setup
 logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 logger = logging.getLogger()
 
@@ -26,27 +24,21 @@ def get_angle_images_from_original_image(original_image_link, style_id):
 
     img_folder_path = os.path.join(PROJECT_PATH, style_id, "img")
     
-    # Check if style_id folder exists, if not create it
     os.makedirs(os.path.join(PROJECT_PATH, style_id), exist_ok=True)
     logger.info(f"Ensured style_id folder under {os.path.join(PROJECT_PATH, style_id)}")
 
-    # Check if img folder exists, if not create it
     os.makedirs(img_folder_path, exist_ok=True)
     
     link_template = original_image_link.rsplit("/", 1)[0]
     
     for i in range(1, NUM_IMAGES + 1):
-        image_save_path = os.path.join(img_folder_path, f"{i}.png")
-        
-        # Skip if image is already downloaded
+        image_save_path = os.path.join(img_folder_path, f"{str(i).zfill(2)}.png")
+
         if os.path.exists(image_save_path):
             logger.info(f"Image {i} already exists. Skipping download.")
             continue
 
-        if i < 10:
-            image_url = f"{link_template}/img0{i}.jpg"
-        else:
-            image_url = f"{link_template}/img{i}.jpg"
+        image_url = f"{link_template}/img{i:02d}.jpg"
         
         response = requests.get(image_url, stream=True)
 
@@ -59,7 +51,6 @@ def get_angle_images_from_original_image(original_image_link, style_id):
 
             image = Image.open(image_save_path)
             width_percent = (MAX_WIDTH / float(image.size[0]))
-            new_height = int((float(image.size[1]) * float(width_percent)))  # Keep Aspect Ratio
             resized_image = image.resize((MAX_WIDTH, new_height), Image.Resampling.LANCZOS)
             resized_image.save(image_save_path)
         else:
@@ -70,7 +61,6 @@ def get_angle_images_from_original_image(original_image_link, style_id):
 def resize_and_save_image(image_path: str):
     image = Image.open(image_path)
     width_percent = (MAX_WIDTH / float(image.size[0]))
-    new_height = int(float(image.size[1]) * width_percent)  # Keep Aspect Ratio
     resized_image = image.resize((MAX_WIDTH, new_height), Image.Resampling.LANCZOS)
     resized_image.save(image_path)
 
@@ -86,14 +76,19 @@ def make_gif(link: str, style_id: str):
 
     gif_folder_path = os.path.join(PROJECT_PATH, style_id, "gif")
     if not os.path.exists(gif_folder_path):
-        logger.info(f"Creating gif for {style_id}.")
-        frames = [Image.open(f"{img_folder_path}/{i}.png") for i in range(1, NUM_IMAGES + 1)]
-        
-        os.mkdir(gif_folder_path)
-        gif_path = os.path.join(gif_folder_path, f"{style_id}.gif")
-        
-        frames[0].save(gif_path, format="GIF", append_images=frames, save_all=True, duration=100, loop=0)
-        logger.info(f"Successfully created gif for {style_id}.")
+        join_images(style_id, img_folder_path, gif_folder_path)
+
+
+
+def join_images(style_id, img_folder_path, gif_folder_path):
+    logger.info(f"Creating gif for {style_id}.")
+    frames = [Image.open(f"{img_folder_path}/{i}.png") for i in range(1, NUM_IMAGES + 1)]
+
+    os.mkdir(gif_folder_path)
+    gif_path = os.path.join(gif_folder_path, f"{style_id}.gif")
+
+    frames[0].save(gif_path, format="GIF", append_images=frames, save_all=True, duration=100, loop=0)
+    logger.info(f"Successfully created gif for {style_id}.")
 
 
 if __name__ == "__main__":
