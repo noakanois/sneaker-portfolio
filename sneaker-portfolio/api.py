@@ -4,8 +4,27 @@ from pydantic import BaseModel
 import sqlite3
 import datetime
 from scrape import get_search_json
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
+from pathlib import Path
 
 app = FastAPI()
+
+app.mount("/static", StaticFiles(directory="../sn-frontend/build/static"), name="static")
+
+from fastapi import HTTPException
+
+@app.get("/")
+def serve_root_files():
+    return FileResponse("../sn-frontend/build/index.html")
+
+@app.get("/manifest.json")
+def serve_manifest():
+    return FileResponse("../sn-frontend/build/manifest.json")
+
+@app.get("/logo192.png")
+def serve_logo():
+    return FileResponse("../sn-frontend/build/logo192.png")
 
 DATABASE_PATH = "test.db"
 
@@ -52,11 +71,6 @@ async def startup_db():
             execute_sql(file)
 
 
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
-
-
 @app.get("/users")
 async def get_users():
     with sqlite3.connect(DATABASE_PATH) as conn:
@@ -69,6 +83,7 @@ async def get_user_portfolio(user_id: int):
     with sqlite3.connect(DATABASE_PATH) as conn:
         results = conn.cursor().execute(
             """
+
             SELECT p.shoe_size, p.favorite, s.name, s.title, s.model, s.brand, s.urlKey, s.thumbUrl, s.smallImageUrl, s.imageUrl, s.description, s.retail_price, s.release_date, s.created_at
             FROM portfolios p
             JOIN shoes s ON p.shoe_id = s.id
