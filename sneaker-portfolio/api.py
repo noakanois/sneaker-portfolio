@@ -87,7 +87,7 @@ async def get_user_portfolio(user_id: int):
         results = conn.cursor().execute(
             """
 
-            SELECT p.shoe_size, p.favorite, s.name, s.title, s.model, s.brand, s.urlKey, s.thumbUrl, s.smallImageUrl, s.imageUrl, s.description, s.retail_price, s.release_date, s.created_at
+            SELECT p.shoe_size, p.favorite, s.uuid, s.name, s.title, s.model, s.brand, s.urlKey, s.thumbUrl, s.smallImageUrl, s.imageUrl, s.description, s.retail_price, s.release_date, s.created_at
             FROM portfolios p
             JOIN shoes s ON p.shoe_id = s.uuid
             WHERE p.user_id = ?
@@ -98,18 +98,19 @@ async def get_user_portfolio(user_id: int):
         {
             "shoe_size": r[0],
             "favorite": r[1],
-            "name": r[2],
-            "title": r[3],
-            "model": r[4],
-            "brand": r[5],
-            "urlKey": r[6],
-            "thumbUrl": r[7],
-            "smallImageUrl": r[8],
-            "imageUrl": r[9],
-            "description": r[10],
-            "retail_price": r[11],
-            "release_date": r[12],
-            "created_at": r[13],
+            "uuid": r[2],
+            "name": r[3],
+            "title": r[4],
+            "model": r[5],
+            "brand": r[6],
+            "urlKey": r[7],
+            "thumbUrl": r[8],
+            "smallImageUrl": r[9],
+            "imageUrl": r[10],
+            "description": r[11],
+            "retail_price": r[12],
+            "release_date": r[13],
+            "created_at": r[14],
         }
         for r in results
     ]
@@ -149,6 +150,18 @@ def search_name(name: str):
     return results
 
 
+
+@app.get("/images/uuid/{uuid}/gif")
+def search_name(uuid: str):
+    return FileResponse(f"./img_data/{uuid}/gif/{uuid}.gif")
+
+@app.get("/images/uuid/{uuid}/image/{index}")
+def search_name(uuid: str, index:str):
+    return FileResponse(f"./img_data/{uuid}/img/{index}.png")
+
+
+
+
 class PortfolioData(BaseModel):
     userId: int
     shoeTitle: str
@@ -169,7 +182,10 @@ async def add_to_portfolio(data: PortfolioData):
         )
         conn.commit()
 
-     
+        download_first_image(shoe_id_image[1],shoe_id_image[0]) # Ensure we always have first image for showing in collection
+        gif_process = Process(target=make_gif,args=(shoe_id_image[1],shoe_id_image[0]))
+        gif_process.start()
+        
 
     return {"status": "success", "message": "Shoe added to portfolio successfully!"}
 
