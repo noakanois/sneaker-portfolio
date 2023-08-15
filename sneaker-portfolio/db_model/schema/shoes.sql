@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS shoes (
-    "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+    "uuid" TEXT UNIQUE PRIMARY KEY,
     "name" TEXT,
     "title" TEXT,
     "model" TEXT,

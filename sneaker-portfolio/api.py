@@ -7,6 +7,9 @@ from scrape import get_search_json
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
+from image import *
+from multiprocessing import Process
+import uuid
 
 app = FastAPI()
 
@@ -86,7 +89,7 @@ async def get_user_portfolio(user_id: int):
 
             SELECT p.shoe_size, p.favorite, s.name, s.title, s.model, s.brand, s.urlKey, s.thumbUrl, s.smallImageUrl, s.imageUrl, s.description, s.retail_price, s.release_date, s.created_at
             FROM portfolios p
-            JOIN shoes s ON p.shoe_id = s.id
+            JOIN shoes s ON p.shoe_id = s.uuid
             WHERE p.user_id = ?
         """, (user_id,)
         ).fetchall()
@@ -118,12 +121,15 @@ def search_name(name: str):
 
     with sqlite3.connect(DATABASE_PATH) as conn:
         for r in results:
+            unique_ID = uuid.uuid5(uuid.NAMESPACE_X500, f"{r['title']}{r['urlKey']}")
+         
             conn.cursor().execute(
                 """
-                INSERT OR REPLACE INTO shoes (name, title, model, brand, urlKey, thumbUrl, smallImageUrl, imageUrl,
+                INSERT OR IGNORE INTO shoes (uuid, name, title, model, brand, urlKey, thumbUrl, smallImageUrl, imageUrl,
                                   description, retail_price, release_date, created_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
+                    str(unique_ID),
                     r["name"],
                     r["title"],
                     r["model"],
@@ -152,16 +158,18 @@ class PortfolioData(BaseModel):
 @app.post("/user/addToPortfolio")
 async def add_to_portfolio(data: PortfolioData):
     with sqlite3.connect(DATABASE_PATH) as conn:
-        shoe_id = conn.cursor().execute("SELECT id FROM shoes WHERE title = ?", (data.shoeTitle,)).fetchone()
+        shoe_id_image = conn.cursor().execute("SELECT uuid,imageUrl FROM shoes WHERE title = ?", (data.shoeTitle,)).fetchone()
 
-        if not shoe_id:
+        if not shoe_id_image:
             raise HTTPException(400, "Shoe not found")
 
         conn.cursor().execute(
             "INSERT INTO portfolios (user_id, shoe_id, shoe_size) VALUES (?, ?, ?)",
-            (data.userId, shoe_id[0], data.shoeSize),
+            (data.userId, shoe_id_image[0], data.shoeSize),
         )
         conn.commit()
+
+     
 
     return {"status": "success", "message": "Shoe added to portfolio successfully!"}
 
@@ -169,7 +177,7 @@ async def add_to_portfolio(data: PortfolioData):
 @app.delete("/user/{user_id}/portfolio/{urlKey}")
 async def delete_from_portfolio(user_id: int, urlKey: str):
     with sqlite3.connect(DATABASE_PATH) as conn:
-        shoe = conn.cursor().execute("SELECT id FROM shoes WHERE urlKey = ?", (urlKey,)).fetchone()
+        shoe = conn.cursor().execute("SELECT uuid FROM shoes WHERE urlKey = ?", (urlKey,)).fetchone()
 
         if not shoe:
             raise HTTPException(404, "Shoe not found")
