@@ -150,14 +150,15 @@ def search_name(name: str):
     return results
 
 
+app.mount("/images", StaticFiles(directory="./img_data"), name="images")
 
-@app.get("/images/uuid/{uuid}/gif")
-def search_name(uuid: str):
-    return FileResponse(f"./img_data/{uuid}/gif/{uuid}.gif")
+# @app.get("/images/uuid/{uuid}/gif")
+# def search_name(uuid: str):
+#     return FileResponse(f"./img_data/{uuid}/gif/{uuid}.gif")
 
-@app.get("/images/uuid/{uuid}/image/{index}")
-def search_name(uuid: str, index:str):
-    return FileResponse(f"./img_data/{uuid}/img/{index}.png")
+# @app.get("/images/uuid/{uuid}/image/{index}")
+# def search_name(uuid: str, index:str):
+#     return FileResponse(f"./img_data/{uuid}/img/{index}.png")
 
 
 

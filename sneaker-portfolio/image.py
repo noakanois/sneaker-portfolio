@@ -11,14 +11,17 @@ from PIL import Image
 PROJECT_PATH = os.path.join(".", "img_data")
 NUM_IMAGES = 36
 MAX_WIDTH = 1200
+PRODUCT_OFFSET = 12
+IMAGE_URL_INDEX = 4
+IMAGE_WIDTH = 800
 
 logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 logger = logging.getLogger()
 
 def convert_url_to_gif_url(image_url:str):
     split_url = image_url.split("/")
-    shoe_split = split_url[4][:len(split_url[4])-12]
-    return f"https://images.stockx.com/360/{shoe_split}/Images/{shoe_split}/Lv2/img01.jpg?w=800"
+    shoe_split = split_url[IMAGE_URL_INDEX ][:len(split_url[IMAGE_URL_INDEX ]) - PRODUCT_OFFSET]
+    return f"https://images.stockx.com/360/{shoe_split}/Images/{shoe_split}/Lv2/img01.jpg?w={IMAGE_WIDTH}"
 
 
 def download_first_image(old_image_url, shoe_uuid):
@@ -36,7 +39,7 @@ def download_first_image(old_image_url, shoe_uuid):
         response = requests.get(image_url, stream=True)
 
         if response.status_code == 200:
-            logger.info(f"Successfully accessed the Website, saving first image")
+            logger.info(f"Successfully accessed the 360 Website, saving first image")
             with open(image_save_path, 'wb') as file:
                 response.raw.decode_content = True
                 shutil.copyfileobj(response.raw, file)
@@ -45,11 +48,11 @@ def download_first_image(old_image_url, shoe_uuid):
 
             logger.warning(f"Failed to download first image from {image_url}, trying to download it from non 360 view instead.")
             image_url_split = old_image_url.split("?")
-            image_url = f"{image_url_split[0]}?w=800"
-            response = requests.get(image_url, stream=True)
+            image_url = f"{image_url_split[0]}?w={IMAGE_WIDTH}"
+            response = requests.get(image_url + "&bg=FFFFFF", stream=True)
 
             if response.status_code == 200:
-                logger.info(f"Successfully accessed the Website, saving first image")
+                logger.info(f"Successfully accessed the non-360 Website, saving first image")
                 with open(image_save_path, 'wb') as file:
                     response.raw.decode_content = True
                     shutil.copyfileobj(response.raw, file)
@@ -74,25 +77,26 @@ def get_rest_of_images(original_image_link, shoe_uuid):
     link_template = original_image_link.rsplit("/", 1)[0]
     
     for i in range(2, NUM_IMAGES + 1):
-        image_save_path = os.path.join(img_folder_path, f"{str(i).zfill(2)}.png")
+        index = str(i).zfill(2)
+        image_save_path = os.path.join(img_folder_path, f"{index}.png")
 
         if os.path.exists(image_save_path):
-            logger.info(f"Image {i} already exists. Skipping download.")
+            logger.info(f"Image {index} already exists. Skipping download.")
             continue
 
-        image_url = f"{link_template}/img{i:02d}.jpg?w=800"
+        image_url = f"{link_template}/img{index}.jpg?w={IMAGE_WIDTH}"
         
         response = requests.get(image_url, stream=True)
 
         if response.status_code == 200:
-            logger.info(f"Successfully accessed the Website, saving image {i}")
+            logger.info(f"Successfully accessed the Website, saving image {index}")
             with open(image_save_path, 'wb') as file:
                 response.raw.decode_content = True
                 shutil.copyfileobj(response.raw, file)
-                logger.info(f"Successfully saved image {i} with url {image_url}")
+                logger.info(f"Successfully saved image {index} with url {image_url}")
 
         else:
-            logger.warning(f"Failed to download image {i} from {image_url}, won't try for more images anymore.")
+            logger.warning(f"Failed to download image {index} from {image_url}, won't try for more images anymore.")
             break
 
 
@@ -114,7 +118,7 @@ def make_gif(image_url: str, uuid: str):
 def join_images(uuid, img_folder_path, gif_folder_path):
     logger.info(f"Creating gif for {uuid}.")
     try:
-        frames = [Image.open(f"{img_folder_path}/{i:02d}.png") for i in range(1, NUM_IMAGES + 1)]
+        frames = [Image.open(f"{img_folder_path}/{str(i).zfill(2)}.png") for i in range(1, NUM_IMAGES + 1)]
     except OSError:
         logger.info(f"gif not available, saving static image of shoe instead.")
         frames = [Image.open(f"{img_folder_path}/01.png")]
@@ -129,46 +133,54 @@ def delete_images(frames,uuid):
     for i,frame in enumerate(frames):
         if i == 0: 
             
-            trimmed_image = trim_image(frame)
+            trim_image(frame.filename)
          
-            trimmed_image.save(frame.filename)  # Replace 'trimmed_image.jpg' with your desired output path
+           
             logger.info(f"Cut image under file path {frame.filename}")
         else:
-            logger.info(f"Removed image {i} for {uuid}")
+            logger.info(f"Removed image {str(i).zfill(2)} for {uuid}")
             os.remove(frame.filename)
 
+def is_row_white(row, threshold=230):
+    # Check if the row is considered white based on a threshold.
+  
+    return all(pixel >= threshold for pixel in row) or all(pixel == 0 for pixel in row)
 
-def trim_image(image):
-    img_data = image.load()
-    width, height = image.size
-
-    # Iterate through rows from top
-    for y in range(height):
-        row_has_color = any(img_data[x, y] != (255, 255, 255) for x in range(width))
-        if row_has_color:
+def trim_image(path):
+    image = Image.open(path)
+    grey_image = image.convert("L")
+    data = list(grey_image.getdata())
+    width, height = grey_image.size
+    pixels = [data[i:i+width] for i in range(0, len(data), width)]
+    
+    top_crop = 0
+    for row in pixels:
+        if is_row_white(row):
+            top_crop += 1
+        else:
             break
-    else:
-        y = 0
-
-    # Iterate through rows from bottom
-    for y_end in range(height - 1, -1, -1):
-        row_has_color = any(img_data[x, y_end] != (255, 255, 255) for x in range(width))
-        if row_has_color:
+            
+    bottom_crop = 0
+    for row in reversed(pixels):
+        if is_row_white(row):
+            bottom_crop += 1
+        else:
             break
-    else:
-        y_end = height - 1
+    
+    # Crop the image based on identified rows.
+    cropped_image = image.crop((0, top_crop, width, height - bottom_crop))
+    
+    
+    cropped_image.save(path)
 
-    if y_end >= y:
-        image = image.crop((0, y, width, y_end + 1))  # Crop the image
-
-    return image
+   
 
 
 if __name__ == "__main__":
     pass
-    # a = trim_image(Image.open("./img_data/b809d894-5bee-5e24-9e6e-15e5da10a80c/img/01.png"))
+    trim_image("./img_data/c457d3c9-ef95-5c03-abee-c9378f0a03cc/img/01.png")
     # Save or display the trimmed image
-    # a.save("./img_data/b809d894-5bee-5e24-9e6e-15e5da10a80c/img/02.png")  
+   
     # test_url = "https://images.stockx.com/360/Air-Jordan-1-High-OG-SP-fragment-design-x-Travis-Scott/Images/Air-Jordan-1-High-OG-SP-fragment-design-x-Travis-Scott/Lv2/img01.jpg?fm=avif&auto=compress&w=576&dpr=2&updated_at=1635344578&h=384&q=75"
     # test_uuid = "DH3227-105"
     # download_first_image(test_url,test_uuid)
