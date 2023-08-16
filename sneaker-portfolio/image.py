@@ -8,9 +8,6 @@ from PIL import Image
 
 PROJECT_PATH = os.path.join(".", "img_data")
 NUM_IMAGES = 36
-MAX_WIDTH = 1200
-PRODUCT_OFFSET = 12
-IMAGE_URL_INDEX = 4
 IMAGE_WIDTH = 800
 INDEX_LENGTH = 2
 WHITE_THRESHOLD = 230
@@ -20,10 +17,11 @@ logger = logging.getLogger()
 
 
 def convert_url_to_gif_url(image_url: str):
+    PRODUCT_OFFSET = 12
+    IMAGE_URL_INDEX = 4
     split_url = image_url.split("/")
-    shoe_split = split_url[IMAGE_URL_INDEX][
-        : len(split_url[IMAGE_URL_INDEX]) - PRODUCT_OFFSET
-    ]
+    url_end_index = len(split_url[IMAGE_URL_INDEX]) - PRODUCT_OFFSET
+    shoe_split = split_url[IMAGE_URL_INDEX][:url_end_index]
     return f"https://images.stockx.com/360/{shoe_split}/Images/{shoe_split}/Lv2/img01.jpg?w={IMAGE_WIDTH}"
 
 
@@ -38,34 +36,31 @@ def download_first_image(old_image_url, shoe_uuid):
 
     if os.path.exists(image_save_path):
         logger.info(f"First image already exists. Skipping download.")
+        return
+    
+    response = requests.get(image_url, stream=True)
+
+    if response.status_code == 200:
+        with open(image_save_path, "wb") as file:
+            response.raw.decode_content = True
+            shutil.copyfileobj(response.raw, file)
+            logger.info(f"Successfully saved first image")
     else:
-        response = requests.get(image_url, stream=True)
+        logger.warning(
+            f"Failed to download first image from {image_url}, trying to download it from non 360 view instead."
+        )
+        image_url_split = old_image_url.split("?")
+        image_url = f"{image_url_split[0]}?w={IMAGE_WIDTH}"
+        disallow_transperency = "&bg=FFFFFF"
+        response = requests.get(f"image_url{disallow_transperency}", stream=True)
 
         if response.status_code == 200:
-            logger.info(f"Successfully accessed the 360 Website, saving first image")
             with open(image_save_path, "wb") as file:
                 response.raw.decode_content = True
                 shutil.copyfileobj(response.raw, file)
                 logger.info(f"Successfully saved first image")
         else:
-            logger.warning(
-                f"Failed to download first image from {image_url}, trying to download it from non 360 view instead."
-            )
-            image_url_split = old_image_url.split("?")
-            image_url = f"{image_url_split[0]}?w={IMAGE_WIDTH}"
-            disallow_transperency = "&bg=FFFFFF"
-            response = requests.get(f"image_url{disallow_transperency}", stream=True)
-
-            if response.status_code == 200:
-                logger.info(
-                    f"Successfully accessed the non-360 Website, saving first image"
-                )
-                with open(image_save_path, "wb") as file:
-                    response.raw.decode_content = True
-                    shutil.copyfileobj(response.raw, file)
-                    logger.info(f"Successfully saved first image")
-            else:
-                logger.info(f"Failed to download first image from {image_url}")
+            logger.info(f"Failed to download first image from {image_url}")
 
 
 def get_rest_of_images(original_image_link, shoe_uuid):
@@ -97,7 +92,6 @@ def get_rest_of_images(original_image_link, shoe_uuid):
         response = requests.get(image_url, stream=True)
 
         if response.status_code == 200:
-            logger.info(f"Successfully accessed the Website, saving image {index}")
             with open(image_save_path, "wb") as file:
                 response.raw.decode_content = True
                 shutil.copyfileobj(response.raw, file)

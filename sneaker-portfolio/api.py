@@ -7,7 +7,7 @@ from scrape import get_search_json
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
-from image import *
+from image import download_first_image, make_gif
 from multiprocessing import Process
 import uuid
 
@@ -122,7 +122,7 @@ def search_name(name: str):
 
     with sqlite3.connect(DATABASE_PATH) as conn:
         for r in results:
-            unique_ID = uuid.uuid5(uuid.NAMESPACE_X500, f"{r['title']}{r['urlKey']}")
+            shoe_uuid = uuid.uuid5(uuid.NAMESPACE_X500, f"{r['title']}{r['urlKey']}")
          
             conn.cursor().execute(
                 """
@@ -130,7 +130,7 @@ def search_name(name: str):
                                   description, retail_price, release_date, created_at)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
-                    str(unique_ID),
+                    str(shoe_uuid),
                     r["name"],
                     r["title"],
                     r["model"],
@@ -150,17 +150,6 @@ def search_name(name: str):
     return results
 
 
-app.mount("/images", StaticFiles(directory="./img_data"), name="images")
-
-# @app.get("/images/uuid/{uuid}/gif")
-# def search_name(uuid: str):
-#     return FileResponse(f"./img_data/{uuid}/gif/{uuid}.gif")
-
-# @app.get("/images/uuid/{uuid}/image/{index}")
-# def search_name(uuid: str, index:str):
-#     return FileResponse(f"./img_data/{uuid}/img/{index}.png")
-
-
 
 
 class PortfolioData(BaseModel):
@@ -172,19 +161,19 @@ class PortfolioData(BaseModel):
 @app.post("/user/addToPortfolio")
 async def add_to_portfolio(data: PortfolioData):
     with sqlite3.connect(DATABASE_PATH) as conn:
-        shoe_id_image = conn.cursor().execute("SELECT uuid,imageUrl FROM shoes WHERE title = ?", (data.shoeTitle,)).fetchone()
+        shoe_id, shoe_image_url = conn.cursor().execute("SELECT uuid,imageUrl FROM shoes WHERE title = ?", (data.shoeTitle,)).fetchone()
 
-        if not shoe_id_image:
+        if not shoe_id:
             raise HTTPException(400, "Shoe not found")
 
         conn.cursor().execute(
             "INSERT INTO portfolios (user_id, shoe_id, shoe_size) VALUES (?, ?, ?)",
-            (data.userId, shoe_id_image[0], data.shoeSize),
+            (data.userId, shoe_id, data.shoeSize),
         )
         conn.commit()
 
-        download_first_image(shoe_id_image[1],shoe_id_image[0]) # Ensure we always have first image for showing in collection
-        gif_process = Process(target=make_gif,args=(shoe_id_image[1],shoe_id_image[0]))
+        download_first_image(shoe_image_url, shoe_id) # Ensure we always have first image for showing in collection
+        gif_process = Process(target=make_gif,args=(shoe_image_url, shoe_id))
         gif_process.start()
         
 
@@ -210,3 +199,4 @@ async def delete_from_portfolio(user_id: int, urlKey: str):
 
     return {"status": "success", "message": "Shoe removed from portfolio successfully!"}
 
+app.mount("/images", StaticFiles(directory="./img_data"), name="images")
