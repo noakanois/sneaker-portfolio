@@ -1,6 +1,6 @@
 - `npm install`
 - `npm run build` for building static website for FastAPI
-- `npm run`
+- `npm start`
 
 
-- `poetry run Uvicorn api:app` to run Backend
+- `poetry run uvicorn api:app` to run Backend
