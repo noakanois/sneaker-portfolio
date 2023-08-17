@@ -16,7 +16,7 @@ app.include_router(router_search)
 app.include_router(router_user)
 
 app.mount(
-    "/static", StaticFiles(directory="../sn-frontend/build/static"), name="static"
+    "/static", StaticFiles(directory="../sneaker-frontend/build/static"), name="static"
 )
 
 app.add_middleware(
@@ -52,22 +52,22 @@ async def startup_db():
 
 @app.get("/")
 def serve_root_files():
-    return FileResponse("../sn-frontend/build/index.html")
+    return FileResponse("../sneaker-frontend/build/index.html")
 
 
 @app.get("/manifest.json")
 def serve_manifest():
-    return FileResponse("../sn-frontend/build/manifest.json")
+    return FileResponse("../sneaker-frontend/build/manifest.json")
 
 
 @app.get("/favicon.ico")
 def serve_favicon():
-    return FileResponse("../sn-frontend/build/favicon.ico")
+    return FileResponse("../sneaker-frontend/build/favicon.ico")
 
 
 @app.get("/logo192.png")
 def serve_logo():
-    return FileResponse("../sn-frontend/build/logo192.png")
+    return FileResponse("../sneaker-frontend/build/logo192.png")
 
 
 @app.exception_handler(sqlite3.DatabaseError)
