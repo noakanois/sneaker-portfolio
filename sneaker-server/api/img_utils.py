@@ -6,7 +6,7 @@ import shutil
 from PIL import Image
 
 
-PROJECT_PATH = os.path.join(".", "img_data")
+PROJECT_PATH = os.path.join(".","api", "img_data")
 NUM_IMAGES = 36
 IMAGE_WIDTH = 800
 INDEX_LENGTH = 2
