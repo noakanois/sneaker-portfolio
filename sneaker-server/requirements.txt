@@ -12,6 +12,7 @@ fastapi==0.101.0 ;
 greenlet==2.0.2 ;
 h11==0.14.0 ; 
 idna==3.4 ; 
+Pillow==10.0.0 ;
 pydantic-core==2.4.0 ; 
 pydantic==2.1.1 ; 
 requests==2.31.0 ; 
