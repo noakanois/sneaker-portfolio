@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException
 from ..db_utils import DATABASE_PATH
 from pydantic import BaseModel
 import sqlite3
-from img_utils import download_first_image, make_gif
+from api.img_utils import download_first_image, make_gif
 from multiprocessing import Process
 
 router_user = APIRouter()
