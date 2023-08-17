@@ -53,8 +53,8 @@ def get_search_json(shoe_name):
                 "smallImageUrl": node["media"]["smallImageUrl"],
                 "imageUrl": node["media"]["smallImageUrl"].split("?fit")[0],
                 "description": node["description"],
-                "retailPrice": 0,
-                "releaseDate": "",
+                "retailPrice": node["productTraits"][0]["value"] if node.get("productTraits") else "N/A",
+                "releaseDate": node["productTraits"][1]["value"] if (node.get("productTraits") and (len(node["productTraits"]) == 2))  else "N/A",
             }
             for trait in node["productTraits"]:
                 sneaker_info[trait["name"]] = trait["value"]

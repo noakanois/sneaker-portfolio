@@ -6,6 +6,7 @@ from api.routes.portfolio import router_portfolio
 from api.routes.search import router_search
 from api.routes.user import router_user
 
+
 import sqlite3
 from api.db_utils import execute_sql, table_empty
 
@@ -15,9 +16,11 @@ app.include_router(router_portfolio)
 app.include_router(router_search)
 app.include_router(router_user)
 
+
 app.mount(
     "/static", StaticFiles(directory="../sneaker-frontend/build/static"), name="static"
 )
+app.mount("/images", StaticFiles(directory="./api/img_data"), name="images")
 
 app.add_middleware(
     CORSMiddleware,

@@ -137,7 +137,7 @@ function MainScreen() {
                 style={isDragging ? { opacity: 0.5 } : {}}
             >
                 <div className="image-container">
-                    <img src={shoe.imageUrl} alt={shoe.title} />
+                    <img src={URL+"images/" + shoe.uuid + "/img/01.png"}></img>
                 </div>
                 <div className="shoe-info">
                     <h4>{shoe.title}</h4>
@@ -308,7 +308,11 @@ function MainScreen() {
                         <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                             <h3 className="modal-title">{selectedShoe.title}</h3>
                             <div className="modal-gif">
-                                <img src={selectedShoe.imageUrl} alt={selectedShoe.title} />
+                                <img src={URL + "images/" + selectedShoe.uuid+ "/gif/"+ selectedShoe.uuid +".gif"} alt={selectedShoe.title} 
+                                onError={({ currentTarget }) => {
+                                currentTarget.onerror = null; 
+                                currentTarget.src= URL + "images/" + selectedShoe.uuid+ "/img/01.png";
+                                }} />
                             </div>
                             <div className="modal-text">
                                 <h4>{selectedShoe.title}</h4>

@@ -2,6 +2,8 @@ from fastapi import APIRouter, HTTPException
 from ..db_utils import DATABASE_PATH
 from pydantic import BaseModel
 import sqlite3
+from api.img_utils import download_first_image, make_gif
+from multiprocessing import Process
 
 router_user = APIRouter()
 
@@ -22,21 +24,23 @@ async def get_users():
 @router_user.post("/user/addToPortfolio")
 async def add_to_portfolio(data: PortfolioData):
     with sqlite3.connect(DATABASE_PATH) as conn:
-        shoe_id = (
+        shoe_id, shoe_image_url = (
             conn.cursor()
-            .execute("SELECT id FROM shoes WHERE title = ?", (data.shoeTitle,))
+            .execute("SELECT uuid,imageUrl FROM shoes WHERE title = ?", (data.shoeTitle,))
             .fetchone()
         )
-
+      
         if not shoe_id:
             raise HTTPException(400, "Shoe not found")
 
         conn.cursor().execute(
             "INSERT INTO portfolios (user_id, shoe_id, shoe_size) VALUES (?, ?, ?)",
-            (data.userId, shoe_id[0], data.shoeSize),
+            (data.userId, shoe_id, data.shoeSize),
         )
         conn.commit()
-
+        download_first_image(shoe_image_url, shoe_id) # Ensure we always have first image for showing in collection
+        gif_process = Process(target=make_gif,args=(shoe_image_url, shoe_id))
+        gif_process.start()
     return {"status": "success", "message": "Shoe added to portfolio successfully!"}
 
 
@@ -45,7 +49,7 @@ async def delete_from_portfolio(user_id: int, urlKey: str):
     with sqlite3.connect(DATABASE_PATH) as conn:
         shoe = (
             conn.cursor()
-            .execute("SELECT id FROM shoes WHERE urlKey = ?", (urlKey,))
+            .execute("SELECT uuid FROM shoes WHERE urlKey = ?", (urlKey,))
             .fetchone()
         )
 
