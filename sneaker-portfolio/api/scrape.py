@@ -22,14 +22,16 @@ def get_search_json(shoe_name):
     }
     url = f"https://stockx.com/en-gb/search/sneakers?s={query_shoe_name}"
     response = requests.get(url, headers=headers)
-    
-    soup = BeautifulSoup(response.content, 'html.parser')
-    script_tag = soup.find('script', id='__NEXT_DATA__')
+
+    soup = BeautifulSoup(response.content, "html.parser")
+    script_tag = soup.find("script", id="__NEXT_DATA__")
 
     json_string = re.search(r'{"props":.*}', script_tag.string, re.DOTALL).group()
 
     data = json.loads(json_string)
-    data = data["props"]["pageProps"]["req"]["appContext"]["states"]["query"]["value"]["queries"]
+    data = data["props"]["pageProps"]["req"]["appContext"]["states"]["query"]["value"][
+        "queries"
+    ]
     for da in data:
         try:
             new_data = da["state"]["data"]["browse"]["results"]["edges"]
@@ -57,6 +59,5 @@ def get_search_json(shoe_name):
             for trait in node["productTraits"]:
                 sneaker_info[trait["name"]] = trait["value"]
             sneakers.append(sneaker_info)
-            
-    return sneakers
 
+    return sneakers
