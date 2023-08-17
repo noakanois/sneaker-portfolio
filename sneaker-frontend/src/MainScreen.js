@@ -5,7 +5,7 @@ import './App.css';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 
-const URL = 'https://nsli.me/';
+const URL = 'http://localhost:8000/';
 
 
 function MainScreen() {
