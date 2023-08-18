@@ -11,7 +11,7 @@ QUERY_GET_PORTFOLIO = """
         portfolios p
     JOIN 
         shoes s ON 
-        p.shoe_id = s.uuid
+        p.shoe_uuid = s.uuid
     WHERE 
         p.user_id = ?;
 """

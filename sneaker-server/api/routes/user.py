@@ -24,22 +24,22 @@ async def get_users():
 @router_user.post("/user/addToPortfolio")
 async def add_to_portfolio(data: PortfolioData):
     with sqlite3.connect(DATABASE_PATH) as conn:
-        shoe_id, shoe_image_url = (
+        shoe_uuid, shoe_image_url = (
             conn.cursor()
             .execute("SELECT uuid,imageUrl FROM shoes WHERE title = ?", (data.shoeTitle,))
             .fetchone()
         )
       
-        if not shoe_id:
+        if not shoe_uuid:
             raise HTTPException(400, "Shoe not found")
 
         conn.cursor().execute(
-            "INSERT INTO portfolios (user_id, shoe_id, shoe_size) VALUES (?, ?, ?)",
-            (data.userId, shoe_id, data.shoeSize),
+            "INSERT INTO portfolios (user_id, shoe_uuid, shoe_size) VALUES (?, ?, ?)",
+            (data.userId, shoe_uuid, data.shoeSize),
         )
         conn.commit()
-        download_first_image(shoe_image_url, shoe_id) # Ensure we always have first image for showing in collection
-        gif_process = Process(target=make_gif,args=(shoe_image_url, shoe_id))
+        download_first_image(shoe_image_url, shoe_uuid) # Ensure we always have first image for showing in collection
+        gif_process = Process(target=make_gif,args=(shoe_image_url, shoe_uuid))
         gif_process.start()
     return {"status": "success", "message": "Shoe added to portfolio successfully!"}
 
@@ -59,7 +59,7 @@ async def delete_from_portfolio(user_id: int, urlKey: str):
         deleted_rows = (
             conn.cursor()
             .execute(
-                "DELETE FROM portfolios WHERE user_id = ? AND shoe_id = ?",
+                "DELETE FROM portfolios WHERE user_id = ? AND shoe_uuid = ?",
                 (user_id, shoe[0]),
             )
             .rowcount
