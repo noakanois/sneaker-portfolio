@@ -19,16 +19,12 @@ logger = logging.getLogger()
 
 
 def convert_url_to_gif_url(image_url: str):
-    PRODUCT_OFFSET = 12
     IMAGE_URL_INDEX = 4
-    split_url = image_url.split("/")
-    url_end_index = len(split_url[IMAGE_URL_INDEX]) - PRODUCT_OFFSET
-    shoe_split = split_url[IMAGE_URL_INDEX][:url_end_index]
-    return f"https://images.stockx.com/360/{shoe_split}/Images/{shoe_split}/Lv2/img01.jpg?w={IMAGE_WIDTH}"
+    url_key = image_url.split("/")[IMAGE_URL_INDEX].replace("-Product.jpg", "").replace("-Product_V2.jpg", "")
+    return f"https://images.stockx.com/360/{url_key }/Images/{url_key}/Lv2/img01.jpg?w={IMAGE_WIDTH}"
 
 
 def download_first_image(old_image_url, shoe_uuid):
-
     image_url = convert_url_to_gif_url(old_image_url)
     if not image_url:
         logger.error("No link provided.")
@@ -40,7 +36,7 @@ def download_first_image(old_image_url, shoe_uuid):
     if os.path.exists(image_save_path):
         logger.info(f"First image already exists. Skipping download.")
         return
-    
+
     response = requests.get(image_url, stream=True)
 
     if response.status_code == 200:
@@ -74,9 +70,7 @@ def get_rest_of_images(original_image_link, shoe_uuid):
     img_folder_path = os.path.join(IMAGE_PATH, shoe_uuid, "img")
 
     os.makedirs(os.path.join(IMAGE_PATH, shoe_uuid), exist_ok=True)
-    logger.info(
-        f"Ensured style_id folder under {os.path.join(IMAGE_PATH, shoe_uuid)}"
-    )
+    logger.info(f"Ensured shoe images folder under {os.path.join(IMAGE_PATH, shoe_uuid)}")
 
     os.makedirs(img_folder_path, exist_ok=True)
 
@@ -187,18 +181,20 @@ def download_not_available_images():
         images_to_download = (
             conn.cursor()
             .execute(
-            """
+                """
             SELECT portfolios.shoe_uuid, shoes.imageUrl 
             FROM portfolios 
             JOIN shoes ON portfolios.shoe_uuid = shoes.uuid
-            """)
-            .fetchall()
+            """
             )
+            .fetchall()
+        )
         for shoe_uuid, shoe_imageUrl in images_to_download:
-            if os.path.exists(os.path.join(IMAGE_PATH,shoe_uuid)):
-                logger.info(f"Already downloaded images for shoe {shoe_uuid}, skipping download.")
+            if os.path.exists(os.path.join(IMAGE_PATH, shoe_uuid)):
+                logger.info(
+                    f"Already downloaded images for shoe {shoe_uuid}, skipping download."
+                )
                 continue
-            download_first_image(shoe_imageUrl,shoe_uuid)
-            gif_process = Process(target=make_gif,args=(shoe_imageUrl, shoe_uuid))
+            download_first_image(shoe_imageUrl, shoe_uuid)
+            gif_process = Process(target=make_gif, args=(shoe_imageUrl, shoe_uuid))
             gif_process.start()
-        
