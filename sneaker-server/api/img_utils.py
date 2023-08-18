@@ -2,10 +2,12 @@ import os
 import logging
 import sys
 import requests
+import sqlite3
 import shutil
+from multiprocessing import Process
 from PIL import Image
 
-
+DATABASE_PATH = "test.db"
 PROJECT_PATH = os.path.join(".","api", "img_data")
 NUM_IMAGES = 36
 IMAGE_WIDTH = 800
@@ -26,6 +28,7 @@ def convert_url_to_gif_url(image_url: str):
 
 
 def download_first_image(old_image_url, shoe_uuid):
+
     image_url = convert_url_to_gif_url(old_image_url)
     if not image_url:
         logger.error("No link provided.")
@@ -52,7 +55,7 @@ def download_first_image(old_image_url, shoe_uuid):
         image_url_split = old_image_url.split("?")
         image_url = f"{image_url_split[0]}?w={IMAGE_WIDTH}"
         disallow_transperency = "&bg=FFFFFF"
-        response = requests.get(f"image_url{disallow_transperency}", stream=True)
+        response = requests.get(f"{image_url}{disallow_transperency}", stream=True)
 
         if response.status_code == 200:
             with open(image_save_path, "wb") as file:
@@ -179,3 +182,21 @@ def trim_image(path):
     cropped_image.save(path)
 
 
+def download_images():
+    with sqlite3.connect(DATABASE_PATH) as conn:
+        images_to_download = (
+            conn.cursor()
+            .execute(
+            """
+            SELECT portfolios.shoe_uuid, shoes.imageUrl 
+            FROM portfolios 
+            JOIN shoes ON portfolios.shoe_uuid = shoes.uuid
+            """)
+            .fetchall()
+            )
+        print(images_to_download)
+        for shoe_uuid, shoe_imageUrl in images_to_download:
+            download_first_image(shoe_imageUrl,shoe_uuid)
+            gif_process = Process(target=make_gif,args=(shoe_imageUrl, shoe_uuid))
+            gif_process.start()
+        
