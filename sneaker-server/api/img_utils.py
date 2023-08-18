@@ -22,6 +22,8 @@ def convert_url_to_gif_url(image_url: str):
     PRODUCT_OFFSET = 12
     IMAGE_URL_INDEX = 4
     split_url = image_url.split("/")
+    if split_url[IMAGE_URL_INDEX][-6:-4] == "V2":
+        PRODUCT_OFFSET += 3
     url_end_index = len(split_url[IMAGE_URL_INDEX]) - PRODUCT_OFFSET
     shoe_split = split_url[IMAGE_URL_INDEX][:url_end_index]
     return f"https://images.stockx.com/360/{shoe_split}/Images/{shoe_split}/Lv2/img01.jpg?w={IMAGE_WIDTH}"
