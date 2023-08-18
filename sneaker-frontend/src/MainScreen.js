@@ -137,10 +137,10 @@ function MainScreen() {
                 style={isDragging ? { opacity: 0.5 } : {}}
             >
                 <div className="image-container">
-                    <img src={URL+"images/" + shoe.uuid + "/img/01.png"}>onError={({ currentTarget }) => {
+                    <img src={URL+"images/" + shoe.uuid + "/img/01.png"}onError={({ currentTarget }) => {
                                 currentTarget.onerror = null; 
                                 currentTarget.src= selectedShoe.imageUrl;
-                                }}</img>
+                                }}></img>
                 </div>
                 <div className="shoe-info">
                     <h4>{shoe.title}</h4>

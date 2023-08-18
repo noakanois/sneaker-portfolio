@@ -9,7 +9,7 @@ from api.routes.user import router_user
 
 import sqlite3
 from api.db_utils import execute_sql, table_empty
-
+from api.img_utils import download_not_available_images
 
 app = FastAPI()
 app.include_router(router_portfolio)
@@ -20,7 +20,7 @@ app.include_router(router_user)
 app.mount(
     "/static", StaticFiles(directory="../sneaker-frontend/build/static"), name="static"
 )
-app.mount("/images", StaticFiles(directory="./api/img_data"), name="images")
+app.mount("/images", StaticFiles(directory="./img_data"), name="images")
 
 app.add_middleware(
     CORSMiddleware,
@@ -51,7 +51,7 @@ async def startup_db():
     for file, table in zip(data_files, tables):
         if table_empty(table):
             execute_sql(file)
-
+    download_not_available_images()
 
 @app.get("/")
 def serve_root_files():
