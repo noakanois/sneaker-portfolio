@@ -194,7 +194,6 @@ def download_images():
             """)
             .fetchall()
             )
-        print(images_to_download)
         for shoe_uuid, shoe_imageUrl in images_to_download:
             download_first_image(shoe_imageUrl,shoe_uuid)
             gif_process = Process(target=make_gif,args=(shoe_imageUrl, shoe_uuid))
