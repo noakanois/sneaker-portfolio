@@ -2,11 +2,13 @@ import os
 import logging
 import sys
 import requests
+import sqlite3
 import shutil
+from multiprocessing import Process
 from PIL import Image
 
-
-PROJECT_PATH = os.path.join(".","api", "img_data")
+DATABASE_PATH = "test.db"
+IMAGE_PATH = os.path.join(".", "img_data")
 NUM_IMAGES = 36
 IMAGE_WIDTH = 800
 INDEX_LENGTH = 2
@@ -26,11 +28,12 @@ def convert_url_to_gif_url(image_url: str):
 
 
 def download_first_image(old_image_url, shoe_uuid):
+
     image_url = convert_url_to_gif_url(old_image_url)
     if not image_url:
         logger.error("No link provided.")
         return
-    img_folder_path = os.path.join(PROJECT_PATH, shoe_uuid, "img")
+    img_folder_path = os.path.join(IMAGE_PATH, shoe_uuid, "img")
     os.makedirs(img_folder_path, exist_ok=True)
     image_save_path = os.path.join(img_folder_path, "01.png")
 
@@ -52,7 +55,7 @@ def download_first_image(old_image_url, shoe_uuid):
         image_url_split = old_image_url.split("?")
         image_url = f"{image_url_split[0]}?w={IMAGE_WIDTH}"
         disallow_transperency = "&bg=FFFFFF"
-        response = requests.get(f"image_url{disallow_transperency}", stream=True)
+        response = requests.get(f"{image_url}{disallow_transperency}", stream=True)
 
         if response.status_code == 200:
             with open(image_save_path, "wb") as file:
@@ -68,11 +71,11 @@ def get_rest_of_images(original_image_link, shoe_uuid):
         logger.error("No link provided.")
         return
 
-    img_folder_path = os.path.join(PROJECT_PATH, shoe_uuid, "img")
+    img_folder_path = os.path.join(IMAGE_PATH, shoe_uuid, "img")
 
-    os.makedirs(os.path.join(PROJECT_PATH, shoe_uuid), exist_ok=True)
+    os.makedirs(os.path.join(IMAGE_PATH, shoe_uuid), exist_ok=True)
     logger.info(
-        f"Ensured style_id folder under {os.path.join(PROJECT_PATH, shoe_uuid)}"
+        f"Ensured style_id folder under {os.path.join(IMAGE_PATH, shoe_uuid)}"
     )
 
     os.makedirs(img_folder_path, exist_ok=True)
@@ -109,8 +112,8 @@ def make_gif(image_url: str, uuid: str):
     logger.info(f"Downloading images for {uuid}.")
     get_rest_of_images(image_url, uuid)
     logger.info(f"Successfully downloaded images for {uuid}.")
-    gif_folder_path = os.path.join(PROJECT_PATH, uuid, "gif")
-    img_folder_path = os.path.join(PROJECT_PATH, uuid, "img")
+    gif_folder_path = os.path.join(IMAGE_PATH, uuid, "gif")
+    img_folder_path = os.path.join(IMAGE_PATH, uuid, "img")
     if not os.path.exists(gif_folder_path):
         join_images(uuid, img_folder_path, gif_folder_path)
 
@@ -179,3 +182,23 @@ def trim_image(path):
     cropped_image.save(path)
 
 
+def download_not_available_images():
+    with sqlite3.connect(DATABASE_PATH) as conn:
+        images_to_download = (
+            conn.cursor()
+            .execute(
+            """
+            SELECT portfolios.shoe_uuid, shoes.imageUrl 
+            FROM portfolios 
+            JOIN shoes ON portfolios.shoe_uuid = shoes.uuid
+            """)
+            .fetchall()
+            )
+        for shoe_uuid, shoe_imageUrl in images_to_download:
+            if os.path.exists(os.path.join(IMAGE_PATH,shoe_uuid)):
+                logger.info(f"Already downloaded images for shoe {shoe_uuid}, skipping download.")
+                continue
+            download_first_image(shoe_imageUrl,shoe_uuid)
+            gif_process = Process(target=make_gif,args=(shoe_imageUrl, shoe_uuid))
+            gif_process.start()
+        

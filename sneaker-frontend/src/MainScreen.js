@@ -137,7 +137,10 @@ function MainScreen() {
                 style={isDragging ? { opacity: 0.5 } : {}}
             >
                 <div className="image-container">
-                    <img src={URL+"images/" + shoe.uuid + "/img/01.png"}></img>
+                    <img src={URL+"images/" + shoe.uuid + "/img/01.png"}onError={({ currentTarget }) => {
+                                currentTarget.onerror = null; 
+                                currentTarget.src= selectedShoe.imageUrl;
+                                }}></img>
                 </div>
                 <div className="shoe-info">
                     <h4>{shoe.title}</h4>
@@ -311,7 +314,7 @@ function MainScreen() {
                                 <img src={URL + "images/" + selectedShoe.uuid+ "/gif/"+ selectedShoe.uuid +".gif"} alt={selectedShoe.title} 
                                 onError={({ currentTarget }) => {
                                 currentTarget.onerror = null; 
-                                currentTarget.src= URL + "images/" + selectedShoe.uuid+ "/img/01.png";
+                                currentTarget.src= selectedShoe.imageUrl;
                                 }} />
                             </div>
                             <div className="modal-text">

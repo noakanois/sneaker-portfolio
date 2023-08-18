@@ -1,5 +1,5 @@
-api/img_data/*
-
+img_data/*
+!img_data/.gitkeep
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
