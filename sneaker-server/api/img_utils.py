@@ -19,7 +19,8 @@ logger = logging.getLogger()
 
 
 def convert_url_to_gif_url(image_url: str):
-    url_key =  image_url.split("/")[4].replace("-Product.jpg", "").replace("-Product_V2.jpg", "")
+    IMAGE_URL_INDEX = 4
+    url_key = image_url.split("/")[IMAGE_URL_INDEX].replace("-Product.jpg", "").replace("-Product_V2.jpg", "")
     return f"https://images.stockx.com/360/{url_key }/Images/{url_key}/Lv2/img01.jpg?w={IMAGE_WIDTH}"
 
 
@@ -69,7 +70,7 @@ def get_rest_of_images(original_image_link, shoe_uuid):
     img_folder_path = os.path.join(IMAGE_PATH, shoe_uuid, "img")
 
     os.makedirs(os.path.join(IMAGE_PATH, shoe_uuid), exist_ok=True)
-    logger.info(f"Ensured style_id folder under {os.path.join(IMAGE_PATH, shoe_uuid)}")
+    logger.info(f"Ensured shoe images folder under {os.path.join(IMAGE_PATH, shoe_uuid)}")
 
     os.makedirs(img_folder_path, exist_ok=True)
 
