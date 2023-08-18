@@ -137,7 +137,14 @@ function MainScreen() {
                 style={isDragging ? { opacity: 0.5 } : {}}
             >
                 <div className="image-container">
-                    <img src={URL+"images/" + shoe.uuid + "/img/01.png"}></img>
+                    <img src={URL + "images/" + shoe.uuid + "/img/01.png"} onError={({ currentTarget }) => {
+                        currentTarget.onerror = null;
+                        currentTarget.src = selectedShoe.imageUrl;
+                    }}></img>
+                    <img className="gif" src={URL + "images/" + shoe.uuid + "/gif/" + shoe.uuid + ".gif"} onError={({ currentTarget }) => {
+                        currentTarget.onerror = null;
+                        currentTarget.src = shoe.imageUrl;
+                    }}></img>
                 </div>
                 <div className="shoe-info">
                     <h4>{shoe.title}</h4>
@@ -308,11 +315,11 @@ function MainScreen() {
                         <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                             <h3 className="modal-title">{selectedShoe.title}</h3>
                             <div className="modal-gif">
-                                <img src={URL + "images/" + selectedShoe.uuid+ "/gif/"+ selectedShoe.uuid +".gif"} alt={selectedShoe.title} 
-                                onError={({ currentTarget }) => {
-                                currentTarget.onerror = null; 
-                                currentTarget.src= URL + "images/" + selectedShoe.uuid+ "/img/01.png";
-                                }} />
+                                <img src={URL + "images/" + selectedShoe.uuid + "/gif/" + selectedShoe.uuid + ".gif"} alt={selectedShoe.title}
+                                    onError={({ currentTarget }) => {
+                                        currentTarget.onerror = null;
+                                        currentTarget.src = selectedShoe.imageUrl;
+                                    }} />
                             </div>
                             <div className="modal-text">
                                 <h4>{selectedShoe.title}</h4>
