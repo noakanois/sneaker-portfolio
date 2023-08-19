@@ -61,7 +61,6 @@ class ReorderPortfolio(BaseModel):
 
 @router_portfolio.post("/user/{user_id}/portfolio/reorder")
 async def reorder_portfolio(user_id: int, order_data: ReorderPortfolio):
-    print(order_data)
     with sqlite3.connect(DATABASE_PATH) as conn:
         cursor = conn.cursor()
 
