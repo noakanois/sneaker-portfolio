@@ -314,8 +314,8 @@ function MainScreen() {
                                 <p><strong>Retail Price:</strong> {"$" + selectedShoe.retail_price}</p>
                                 <p>
                                     <strong>Link:</strong>{" "}
-                                    <a href={"https://stockx.com/" + selectedShoe.uuid} target="_blank" rel="noopener noreferrer">
-                                        {"https://stockx.com/" + selectedShoe.uuid}
+                                    <a href={"https://stockx.com/" + selectedShoe.urlKey} target="_blank" rel="noopener noreferrer">
+                                        {"https://stockx.com/" + selectedShoe.urlKey}
                                     </a>
                                 </p>
                                 <p><strong>Description:</strong> {selectedShoe.description}</p>
