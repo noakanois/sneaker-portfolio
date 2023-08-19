@@ -7,7 +7,6 @@ import { DndProvider, useDrag, useDrop } from 'react-dnd';
 
 const URL = 'http://localhost:8000/';
 
-
 function MainScreen() {
     const [users, setUsers] = useState([]);
     const [portfolio, setPortfolio] = useState([]);
@@ -19,8 +18,6 @@ function MainScreen() {
     const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
     const [selectedSize, setSelectedSize] = useState('');
     const [isSizeModalOpen, setIsSizeModalOpen] = useState(false);
-
-
 
     axios.defaults.headers['ngrok-skip-browser-warning'] = 'true';
 
@@ -42,8 +39,6 @@ function MainScreen() {
             setSearchResults(response.data);
         });
     };
-
-
     const handleUserClick = (userId) => {
         setSelectedUserId(userId);
         localStorage.setItem('userId', userId);
@@ -58,9 +53,6 @@ function MainScreen() {
         setSelectedShoe(shoe);
         setIsModalOpen(true);
     }
-
-
-
     const addShoeToPortfolio = () => {
         if (!selectedSize) {
             alert('Please select a size before adding to the portfolio.');
@@ -91,7 +83,7 @@ function MainScreen() {
         if (!window.confirm("Are you sure you want to delete this shoe from your portfolio?")) {
             return;
         }
-        axios.delete(URL + `user/${selectedUserId}/portfolio/${selectedShoe.urlKey}`)
+        axios.delete(URL + `user/${selectedUserId}/portfolio/${selectedShoe.uuid}`)
             .then(response => {
                 setIsModalOpen(false);
                 handleUserClick(selectedUserId);
@@ -102,8 +94,6 @@ function MainScreen() {
             });
     }
 
-
-
     const DraggableShoeCard = ({ shoe, index, moveShoe }) => {
         const [{ isDragging }, dragRef] = useDrag({
             type: 'SHOE',
@@ -112,7 +102,6 @@ function MainScreen() {
                 isDragging: !!monitor.isDragging()
             })
         });
-
         const [, dropRef] = useDrop({
             accept: 'SHOE',
             hover: (draggedItem) => {
@@ -122,15 +111,13 @@ function MainScreen() {
                 }
             }
         });
-
         const ref = (node) => {
             dragRef(node);
             dropRef(node);
         }
-
         return (
             <div
-                key={shoe.urlKey}
+                key={shoe.uuid}
                 className="shoe-card"
                 onClick={() => handleShoeClick(shoe)}
                 ref={ref}
@@ -152,13 +139,16 @@ function MainScreen() {
             </div>
         );
     };
-
     const moveShoe = (fromIndex, toIndex) => {
         const updatedPortfolio = [...portfolio];
         const [movedShoe] = updatedPortfolio.splice(fromIndex, 1);
         updatedPortfolio.splice(toIndex, 0, movedShoe);
         setPortfolio(updatedPortfolio);
+    
+        const updatedOrder = updatedPortfolio.map(shoe => shoe.uuid);
+        axios.post(URL + `user/${selectedUserId}/portfolio/reorder`, { shoe_uuids: updatedOrder });
     };
+    
 
     const DroppablePortfolio = ({ children, onDrop }) => {
         const [, dropRef] = useDrop({
@@ -171,21 +161,30 @@ function MainScreen() {
                 return onDrop(item, portfolio.length);
             }
         });
-
         return (
             <div ref={dropRef} className="shoe-grid">
                 {React.Children.map(children, child => child)}
             </div>
         );
     };
-
     const handleDrop = (shoe, index) => {
-        const updatedPortfolio = portfolio.filter(item => item.urlKey !== shoe.urlKey);
+        const updatedPortfolio = portfolio.filter(item => item.uuid !== shoe.uuid);
 
         updatedPortfolio.splice(index, 0, shoe);
 
         setPortfolio(updatedPortfolio);
     };
+
+    const getRandomShoe = () => {
+        if (portfolio.length === 0) {
+           alert('No shoes in the portfolio to select from!');
+           return;
+        }
+        const randomIndex = Math.floor(Math.random() * portfolio.length);
+        const randomShoe = portfolio[randomIndex];
+        setSelectedShoe(randomShoe);
+        setIsModalOpen(true);
+     }
 
     return (
         <DndProvider backend={HTML5Backend}>
@@ -208,7 +207,11 @@ function MainScreen() {
                     <button className="button" onClick={() => setIsSearchModalOpen(true)}>
                         Add Shoe
                     </button>
-                </div>
+                    <button className="button" onClick={getRandomShoe} style={{ marginLeft: '10px' }}>
+                        Random Shoe
+                    </button>
+                    </div>
+
 
                 {isSearchModalOpen && (
                     <div className="search-modal-overlay">
@@ -241,13 +244,12 @@ function MainScreen() {
 
                             <div className="shoe-grid">
                                 {searchResults.map(shoe => (
-                                    <div key={shoe.urlKey} className="shoe-card" onClick={() => showSizeModal(shoe)}>
+                                    <div key={shoe.uuid} className="shoe-card" onClick={() => showSizeModal(shoe)}>
                                         <div className="image-container">
                                             <img src={shoe.thumbUrl} alt={shoe.title} />
                                         </div>
                                         <div className="shoe-info">
                                             <h4>{shoe.title}</h4>
-
                                         </div>
                                     </div>
                                 ))}
@@ -258,7 +260,6 @@ function MainScreen() {
                         </div>
                     </div>
                 )}
-
                 {isSizeModalOpen && (
                     <div className="modal-overlay" onClick={() => setIsSizeModalOpen(false)}>
                         <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -268,7 +269,6 @@ function MainScreen() {
                                     <img src={selectedShoe.imageUrl} alt={selectedShoe.title} />
                                 </div>
                                 <select onChange={(e) => setSelectedSize(e.target.value)}>
-
                                     <option value="40">40</option>
                                     <option value="40.5">40.5</option>
                                     <option value="41">41</option>
@@ -304,7 +304,7 @@ function MainScreen() {
                             <h3>Displaying portfolio {selectedUserId}</h3>
                             <DroppablePortfolio onDrop={handleDrop}>
                                 {portfolio.map((shoe, idx) => (
-                                    <DraggableShoeCard shoe={shoe} key={shoe.urlKey} index={idx} moveShoe={moveShoe} />
+                                    <DraggableShoeCard shoe={shoe} key={shoe.uuid} index={idx} moveShoe={moveShoe} />
                                 ))}
                             </DroppablePortfolio>
                         </>
@@ -345,9 +345,6 @@ function MainScreen() {
                         </div>
                     </div>
                 )}
-
-
-
             </div>
         </DndProvider>
     );

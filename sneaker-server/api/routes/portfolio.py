@@ -1,6 +1,8 @@
 from fastapi import APIRouter
 from ..db_utils import DATABASE_PATH
 import sqlite3
+from pydantic import BaseModel
+from typing import List
 
 router_portfolio = APIRouter()
 
@@ -13,7 +15,9 @@ QUERY_GET_PORTFOLIO = """
         shoes s ON 
         p.shoe_uuid = s.uuid
     WHERE 
-        p.user_id = ?;
+        p.user_id = ?
+    ORDER BY
+        p.order_position;
 """
 
 
@@ -49,3 +53,23 @@ async def get_user_portfolio(user_id: int):
         }
         for r in results
     ]
+
+
+class ReorderPortfolio(BaseModel):
+    shoe_uuids: List[str]
+
+
+@router_portfolio.post("/user/{user_id}/portfolio/reorder")
+async def reorder_portfolio(user_id: int, order_data: ReorderPortfolio):
+    with sqlite3.connect(DATABASE_PATH) as conn:
+        cursor = conn.cursor()
+
+        for position, shoe_uuid in enumerate(order_data.shoe_uuids):
+            cursor.execute(
+                "UPDATE portfolios SET order_position = ? WHERE user_id = ? AND shoe_uuid = ?",
+                (position, user_id, shoe_uuid),
+            )
+
+        conn.commit()
+
+    return {"status": "success", "message": "Portfolio reordered successfully!"}
