@@ -11,6 +11,7 @@ import sqlite3
 from api.db_utils import execute_sql, table_empty
 from api.img_utils import download_not_available_images
 import logging
+
 app = FastAPI()
 app.include_router(router_portfolio)
 app.include_router(router_search)

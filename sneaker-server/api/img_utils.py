@@ -20,7 +20,11 @@ logger = logging.getLogger()
 
 def convert_url_to_gif_url(image_url: str):
     IMAGE_URL_INDEX = 4
-    url_key = image_url.split("/")[IMAGE_URL_INDEX].replace("-Product.jpg", "").replace("-Product_V2.jpg", "")
+    url_key = (
+        image_url.split("/")[IMAGE_URL_INDEX]
+        .replace("-Product.jpg", "")
+        .replace("-Product_V2.jpg", "")
+    )
     return f"https://images.stockx.com/360/{url_key }/Images/{url_key}/Lv2/img01.jpg?w={IMAGE_WIDTH}"
 
 
@@ -70,7 +74,9 @@ def get_rest_of_images(original_image_link, shoe_uuid):
     img_folder_path = os.path.join(IMAGE_PATH, shoe_uuid, "img")
 
     os.makedirs(os.path.join(IMAGE_PATH, shoe_uuid), exist_ok=True)
-    logger.info(f"Ensured shoe images folder under {os.path.join(IMAGE_PATH, shoe_uuid)}")
+    logger.info(
+        f"Ensured shoe images folder under {os.path.join(IMAGE_PATH, shoe_uuid)}"
+    )
 
     os.makedirs(img_folder_path, exist_ok=True)
 
@@ -175,26 +181,35 @@ def trim_image(path):
     cropped_image = image.crop((0, top_crop, width, height - bottom_crop))
     cropped_image.save(path)
 
+
 MAX_THREADS = 10
+
+
 def download_not_available_images():
     with sqlite3.connect(DATABASE_PATH) as conn:
-        images_to_download = conn.cursor().execute(
-            """
+        images_to_download = (
+            conn.cursor()
+            .execute(
+                """
             SELECT portfolios.shoe_uuid, shoes.imageUrl 
             FROM portfolios 
             JOIN shoes ON portfolios.shoe_uuid = shoes.uuid
             """
-        ).fetchall()
+            )
+            .fetchall()
+        )
 
         def process_shoe(shoe_data):
             shoe_uuid, shoe_image_url = shoe_data
             if os.path.exists(os.path.join(IMAGE_PATH, shoe_uuid)):
-                logger.info(f"Images for shoe {shoe_uuid} already downloaded. Skipping.")
+                logger.info(
+                    f"Images for shoe {shoe_uuid} already downloaded. Skipping."
+                )
                 return
             download_first_image(shoe_image_url, shoe_uuid)
             make_gif(shoe_image_url, shoe_uuid)
 
         with ThreadPoolExecutor(max_workers=MAX_THREADS) as executor:
             executor.map(process_shoe, images_to_download)
-    
+
     logging.info("Finished downloading")

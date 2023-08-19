@@ -20,15 +20,18 @@ QUERY_SHOES_2 = """
     );
 """
 
-conn = sqlite3.connect('../../test.db')
+conn = sqlite3.connect("../../test.db")
 df = pd.read_sql_query("SELECT * FROM shoes", conn)
 conn.cursor().execute(QUERY_SHOES_2)
 conn.commit()
 
-df["id"] = df.apply(lambda row: str(uuid.uuid5(uuid.NAMESPACE_X500, f"{row['title']}{row['urlKey']}")), axis=1)
-df = df.rename(columns={'id': 'uuid'})
-df = df.drop_duplicates(subset='uuid')
-df.to_sql('shoes2', conn, if_exists="append", index=False)
+df["id"] = df.apply(
+    lambda row: str(uuid.uuid5(uuid.NAMESPACE_X500, f"{row['title']}{row['urlKey']}")),
+    axis=1,
+)
+df = df.rename(columns={"id": "uuid"})
+df = df.drop_duplicates(subset="uuid")
+df.to_sql("shoes2", conn, if_exists="append", index=False)
 
 QUERY_SHOES_TEMP = "ALTER TABLE shoes RENAME TO shoes_temp"
 QUERY_SHOES2_SHOES = "ALTER TABLE shoes2 RENAME TO shoes"
