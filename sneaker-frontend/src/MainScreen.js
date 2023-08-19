@@ -174,6 +174,18 @@ function MainScreen() {
 
         setPortfolio(updatedPortfolio);
     };
+
+    const getRandomShoe = () => {
+        if (portfolio.length === 0) {
+           alert('No shoes in the portfolio to select from!');
+           return;
+        }
+        const randomIndex = Math.floor(Math.random() * portfolio.length);
+        const randomShoe = portfolio[randomIndex];
+        setSelectedShoe(randomShoe);
+        setIsModalOpen(true);
+     }
+
     return (
         <DndProvider backend={HTML5Backend}>
             <div className="App">
@@ -195,7 +207,11 @@ function MainScreen() {
                     <button className="button" onClick={() => setIsSearchModalOpen(true)}>
                         Add Shoe
                     </button>
-                </div>
+                    <button className="button" onClick={getRandomShoe} style={{ marginLeft: '10px' }}>
+                        Random Shoe
+                    </button>
+                    </div>
+
 
                 {isSearchModalOpen && (
                     <div className="search-modal-overlay">
