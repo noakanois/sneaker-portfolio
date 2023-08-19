@@ -26,10 +26,12 @@ async def add_to_portfolio(data: PortfolioData):
     with sqlite3.connect(DATABASE_PATH) as conn:
         shoe_uuid, shoe_image_url = (
             conn.cursor()
-            .execute("SELECT uuid,imageUrl FROM shoes WHERE title = ?", (data.shoeTitle,))
+            .execute(
+                "SELECT uuid,imageUrl FROM shoes WHERE title = ?", (data.shoeTitle,)
+            )
             .fetchone()
         )
-      
+
         if not shoe_uuid:
             raise HTTPException(400, "Shoe not found")
 
@@ -38,8 +40,10 @@ async def add_to_portfolio(data: PortfolioData):
             (data.userId, shoe_uuid, data.shoeSize),
         )
         conn.commit()
-        download_first_image(shoe_image_url, shoe_uuid) # Ensure we always have first image for showing in collection
-        gif_process = Process(target=make_gif,args=(shoe_image_url, shoe_uuid))
+        download_first_image(
+            shoe_image_url, shoe_uuid
+        )  # Ensure we always have first image for showing in collection
+        gif_process = Process(target=make_gif, args=(shoe_image_url, shoe_uuid))
         gif_process.start()
     return {"status": "success", "message": "Shoe added to portfolio successfully!"}
 
