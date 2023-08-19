@@ -48,23 +48,15 @@ async def add_to_portfolio(data: PortfolioData):
     return {"status": "success", "message": "Shoe added to portfolio successfully!"}
 
 
-@router_user.delete("/user/{user_id}/portfolio/{urlKey}")
-async def delete_from_portfolio(user_id: int, urlKey: str):
+@router_user.delete("/user/{user_id}/portfolio/{shoe_uuid}")
+async def delete_from_portfolio(user_id: int, shoe_uuid: str):
     with sqlite3.connect(DATABASE_PATH) as conn:
-        shoe = (
-            conn.cursor()
-            .execute("SELECT uuid FROM shoes WHERE urlKey = ?", (urlKey,))
-            .fetchone()
-        )
-
-        if not shoe:
-            raise HTTPException(404, "Shoe not found")
-
+        
         deleted_rows = (
             conn.cursor()
             .execute(
                 "DELETE FROM portfolios WHERE user_id = ? AND shoe_uuid = ?",
-                (user_id, shoe[0]),
+                (user_id, shoe_uuid),
             )
             .rowcount
         )
