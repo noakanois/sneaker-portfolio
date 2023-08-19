@@ -54,9 +54,11 @@ async def get_user_portfolio(user_id: int):
         for r in results
     ]
 
+
 class ReorderPortfolio(BaseModel):
     shoe_uuids: List[str]
-    
+
+
 @router_portfolio.post("/user/{user_id}/portfolio/reorder")
 async def reorder_portfolio(user_id: int, order_data: ReorderPortfolio):
     print(order_data)
@@ -66,7 +68,7 @@ async def reorder_portfolio(user_id: int, order_data: ReorderPortfolio):
         for position, shoe_uuid in enumerate(order_data.shoe_uuids):
             cursor.execute(
                 "UPDATE portfolios SET order_position = ? WHERE user_id = ? AND shoe_uuid = ?",
-                (position, user_id, shoe_uuid)
+                (position, user_id, shoe_uuid),
             )
 
         conn.commit()
