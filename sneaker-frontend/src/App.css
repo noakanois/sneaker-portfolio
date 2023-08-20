@@ -1,5 +1,9 @@
+@import 'colors.css';
+
 .App {
   text-align: center;
+  background-color: var(--background-color);
+  position: relative;
 }
 
 .App-logo {
@@ -271,6 +275,9 @@
   height: 100%;
 }
 
+.main-grid {
+  margin-top: -20px; 
+}
 
 .main-grid .shoe-card img.gif {
   display: none;  
@@ -283,6 +290,107 @@
 .main-grid .shoe-card:hover img:not(.gif) {
   display: none; 
 }
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 30px; 
+  background-color: var(--secondary-color); 
+  color: white;
+  position: relative;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
+}
+.navbar-brand {
+  font-size: 28px; 
+  font-weight: bold;
+  color: var(--primary-color);
+}
+
+.user-dropdown {
+  position: relative;
+  cursor: pointer;
+  font-size: 22px;
+  color: var(--primary-color); 
+  font-weight: bold;
+  margin: 0 20px;
+}
+
+.user-dropdown::after {
+  content: '▼';
+  margin-left: 5px;
+  font-size: 20px; 
+}
+
+.user-dropdown-content {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  border: 1px solid #ddd;
+  background-color: #f9f9f9;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  z-index: 1;
+  min-width: 200px; 
+  border-radius: 5px; 
+}
+
+.user-dropdown-content a {
+  color: black;
+  padding: 12px 20px; 
+  text-decoration: none;
+  display: block;
+}
+
+.user-dropdown-content a:hover {
+  background-color: #ddd;
+}
+
+.user-dropdown:hover .user-dropdown-content {
+  display: block;
+}
+
+
+.action-buttons {
+  display: flex;
+  flex-direction: column;  
+  gap: 20px;
+  position: fixed;      
+  bottom: 40px;        
+  right: 40px;         
+  z-index: 1000;        
+}
+
+.action-button {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 50%;    
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  width: 60px;           
+  height: 60px;           
+  display: flex;         
+  justify-content: center;
+  align-items: center;
+  font-size: 40px;
+}
+
+.action-button.add {
+  background-color:var(--primary-color); 
+  color: white;
+}
+
+.action-button.random {
+  background-color:var(--primary-color); 
+  color: white;
+}
+
+.action-button:hover {
+  opacity: 0.9;
+}
+
+
 
 @media only screen and (max-width: 767px) {
   .shoe-grid {

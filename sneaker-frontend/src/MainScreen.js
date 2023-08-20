@@ -11,6 +11,8 @@ function MainScreen() {
     const [users, setUsers] = useState([]);
     const [portfolio, setPortfolio] = useState([]);
     const [selectedUserId, setSelectedUserId] = useState(localStorage.getItem('userId') || '1');
+    const [selectedUser, setSelectedUser] = useState(null);
+
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedShoe, setSelectedShoe] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
@@ -26,28 +28,50 @@ function MainScreen() {
     }
 
     useEffect(() => {
-
         axios.get(URL + 'users').then(response => {
-            setUsers(response.data);
-            handleUserClick(selectedUserId);
+            const fetchedUsers = response.data;
+            setUsers(fetchedUsers);
+            
+            let currentUserId = localStorage.getItem('userId') || fetchedUsers[0].id.toString();
+            
+            const currentUser = fetchedUsers.find(user => user.id.toString() === currentUserId);
+            setSelectedUser(currentUser);
+            setSelectedUserId(currentUser.id.toString());
+    
+        }).catch(error => {
+            console.error("Error fetching users:", error);
         });
     }, []);
-
+    
+    useEffect(() => {
+        if (selectedUserId) {
+            handleUserClick(selectedUserId);
+        }
+    }, [selectedUserId]);
+    
     const handleSearch = () => {
         axios.get(URL + 'search/name/' + searchTerm, { name: searchTerm }).then(response => {
             setSearchResults(response.data);
         });
     };
-    const handleUserClick = (userId) => {
+    const handleUserClick = async (userIdString) => {
+        const userId = parseInt(userIdString, 10);
+    
+        const currentUser = users.find(user => user.id === userId);
+        setSelectedUser(currentUser);
         setSelectedUserId(userId);
-        localStorage.setItem('userId', userId);
-        axios.defaults.headers['X-User-ID'] = userId;
-
-        axios.get(URL + `user/${userId}/portfolio`).then(response => {
+    
+        localStorage.setItem('userId', userIdString);
+        axios.defaults.headers['X-User-ID'] = userIdString;
+    
+        try {
+            const response = await axios.get(URL + `user/${userId}/portfolio`);
             setPortfolio(response.data);
-        });
+        } catch (error) {
+            console.error("Failed to fetch portfolio for user:", error);
+        }
     };
-
+    
     const handleShoeClick = (shoe) => {
         setSelectedShoe(shoe);
         setIsModalOpen(true);
@@ -182,31 +206,48 @@ function MainScreen() {
         setIsModalOpen(true);
      }
 
+     const Navbar = ({ users, handleUserClick, selectedUserId, selectedUser }) => (
+        <div className="navbar">
+            <div className="navbar-brand">
+                Sneaker Portfolio
+            </div>
+            
+            <div className="user-dropdown">
+                <span style={{ fontSize: '24px', cursor: 'pointer' }}>
+                    {selectedUser ? selectedUser.name : 'Loading...'}
+                </span>
+                <div className="user-dropdown-content">
+                    {users.map(user => (
+                        <a
+                            key={user.id}
+                            onClick={() => handleUserClick(user.id)}
+                            style={selectedUserId === user.id.toString() ? { backgroundColor: '#ddd' } : {}}
+                        >
+                            {user.name}
+                        </a>
+                    ))}
+                </div>
+            </div>
+    
+            <div className="action-buttons">
+                <button className="action-button add" onClick={() => setIsSearchModalOpen(true)}>+</button>
+                <button className="action-button random" onClick={getRandomShoe}>🎲 </button>
+            </div>
+        </div>
+    );
+    
+    
+
+
+    
     return (
         <DndProvider backend={HTML5Backend}>
             <div className="App">
-                <div className="App-header">
-                    <h1>Sneaker portfolio</h1>
-                    <div className="user-buttons">
-                        {users.map(user => (
-                            <button className="button"
-                                key={user.id}
-                                onClick={() => handleUserClick(user.id)}
-                                style={selectedUserId === user.id.toString() ? { backgroundColor: 'black' } : {}}
-                            >
-                                {user.name}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-                <div style={{ marginTop: '20px' }}>
-                    <button className="button" onClick={() => setIsSearchModalOpen(true)}>
-                        Add Item
-                    </button>
-                    <button className="button" onClick={getRandomShoe} style={{ marginLeft: '10px' }}>
-                        Random Item
-                    </button>
-                    </div>
+            <Navbar 
+                users={users} 
+                handleUserClick={handleUserClick} 
+                selectedUser={selectedUser} 
+            />
 
 
                 {isSearchModalOpen && (
@@ -284,7 +325,7 @@ function MainScreen() {
                 <div>
                     {selectedUserId && (
                         <>
-                            <h3>Displaying portfolio {selectedUserId}</h3>
+
                             <DroppablePortfolio onDrop={handleDrop}>
                                 {portfolio.map((shoe, idx) => (
                                     <DraggableShoeCard shoe={shoe} key={shoe.uuid} index={idx} moveShoe={moveShoe} />
@@ -296,6 +337,7 @@ function MainScreen() {
                 {isModalOpen && (
                     <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
                         <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                        <button className="button" onClick={() => setIsModalOpen(false)}>Close</button>
                             <h3 className="modal-title">{selectedShoe.title}</h3>
                             <div className="modal-gif">
                                 <img src={URL + "images/" + selectedShoe.uuid + "/gif/" + selectedShoe.uuid + ".gif"} alt={selectedShoe.title}
