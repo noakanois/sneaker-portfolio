@@ -284,6 +284,14 @@
   display: none; 
 }
 
+@media only screen and (max-width: 767px) {
+  .shoe-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px; 
+  }
+}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
