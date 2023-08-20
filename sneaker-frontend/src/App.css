@@ -1,5 +1,10 @@
+@import 'colors.css';
+
 .App {
   text-align: center;
+  background-color: var(--background-color);
+  position: relative;
+  font-family: "Century Gothic";
 }
 
 .App-logo {
@@ -21,7 +26,6 @@
   align-items: center;
   justify-content: center;
   font-size: calc(10px + 1vmin); 
-  color: black;
 }
 
 .close-button {
@@ -52,7 +56,6 @@
 .shoe-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  grid-gap: 1em;
 }
 
 .shoe-card {
@@ -83,7 +86,8 @@
   width: 100%;
   object-fit: contain;     
   flex: 1 0 auto;    
-  object-position: bottom;    
+  object-position: bottom;   
+ 
 }
 
 .shoe-info {
@@ -120,7 +124,7 @@
 }
 
 .modal-content {
-  background: white;
+  background: rgb(255, 255, 255);
   padding: 20px;
   width: 90%;
   max-width: 800px; 
@@ -179,6 +183,7 @@
 .search-modal-text {
   text-align: left; 
 }
+
 .search-modal-gif {
   max-width: 100%; 
   max-height: 100%;
@@ -198,9 +203,10 @@
 .modal-text {
   text-align: left;
   padding: 10px;
-  background-color: #f9f9f9;
+  background-color: #ffffff;
   border-radius: 5px;
   margin-top: 15px;
+  box-shadow: 0 4px 8px rgba(255, 255, 255, 0.2);
 }
 
 .modal-text h4 {
@@ -238,7 +244,7 @@
 .button {
   padding: 10px 20px;
   font-size: 16px;
-  background-color: grey;
+  background-color: var(--third-color);
   color: white;
   border: none;
   border-radius: 5px;
@@ -271,18 +277,133 @@
   height: 100%;
 }
 
-.shoe-card img.gif {
+.main-grid {
+  margin-top: -10px; 
+}
+
+.main-grid .shoe-card img.gif {
   display: none;  
 }
 
-.shoe-card:hover img.gif {
+.main-grid .shoe-card:hover img.gif {
   display: block;  
 }
 
-.shoe-card:hover img:not(.gif) {
+.main-grid .shoe-card:hover img:not(.gif) {
   display: none; 
 }
 
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 30px; 
+  background-color: var(--secondary-color); 
+  color: white;
+  position: relative;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
+  user-select: none;
+}
+.navbar-brand {
+  font-size: 28px; 
+  font-weight: bold;
+  color: var(--primary-color);
+  user-select: none;
+}
+
+.user-dropdown {
+  position: relative;
+  cursor: pointer;
+  font-size: 22px;
+  color: var(--primary-color); 
+  font-weight: bold;
+  margin: 0 20px;
+  user-select: none;
+}
+
+.user-dropdown::after {
+  content: '▼';
+  margin-left: 5px;
+  font-size: 20px; 
+}
+
+.user-dropdown-content {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  border: 1px solid #ddd;
+  background-color: #f9f9f9;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  z-index: 1;
+  min-width: 200px; 
+  border-radius: 5px; 
+}
+
+.user-dropdown-content a {
+  color: black;
+  padding: 12px 20px; 
+  text-decoration: none;
+  display: block;
+}
+
+.user-dropdown-content a:hover {
+  background-color: #ddd;
+}
+
+.user-dropdown:hover .user-dropdown-content {
+  display: block;
+}
+
+
+.action-buttons {
+  display: flex;
+  flex-direction: column;  
+  gap: 20px;
+  position: fixed;      
+  bottom: 40px;        
+  right: 40px;         
+  z-index: 1000;        
+}
+
+.action-button {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 50%;    
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  width: 60px;           
+  height: 60px;           
+  display: flex;         
+  justify-content: center;
+  align-items: center;
+  font-size: 40px;
+}
+
+.action-button.add {
+  background-color:var(--primary-color); 
+  color: white;
+}
+
+.action-button.random {
+  background-color:var(--primary-color); 
+  color: white;
+}
+
+.action-button:hover {
+  opacity: 0.9;
+}
+
+
+
+@media only screen and (max-width: 767px) {
+  .shoe-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px; 
+  }
+}
 
 @keyframes App-logo-spin {
   from {

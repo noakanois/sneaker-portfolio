@@ -4,7 +4,7 @@ import sys
 import requests
 import sqlite3
 import shutil
-from multiprocessing import Process
+from concurrent.futures import ThreadPoolExecutor
 from PIL import Image
 
 DATABASE_PATH = "test.db"
@@ -20,7 +20,11 @@ logger = logging.getLogger()
 
 def convert_url_to_gif_url(image_url: str):
     IMAGE_URL_INDEX = 4
-    url_key = image_url.split("/")[IMAGE_URL_INDEX].replace("-Product.jpg", "").replace("-Product_V2.jpg", "")
+    url_key = (
+        image_url.split("/")[IMAGE_URL_INDEX]
+        .replace("-Product.jpg", "")
+        .replace("-Product_V2.jpg", "")
+    )
     return f"https://images.stockx.com/360/{url_key }/Images/{url_key}/Lv2/img01.jpg?w={IMAGE_WIDTH}"
 
 
@@ -70,7 +74,9 @@ def get_rest_of_images(original_image_link, shoe_uuid):
     img_folder_path = os.path.join(IMAGE_PATH, shoe_uuid, "img")
 
     os.makedirs(os.path.join(IMAGE_PATH, shoe_uuid), exist_ok=True)
-    logger.info(f"Ensured shoe images folder under {os.path.join(IMAGE_PATH, shoe_uuid)}")
+    logger.info(
+        f"Ensured shoe images folder under {os.path.join(IMAGE_PATH, shoe_uuid)}"
+    )
 
     os.makedirs(img_folder_path, exist_ok=True)
 
@@ -176,6 +182,9 @@ def trim_image(path):
     cropped_image.save(path)
 
 
+MAX_THREADS = 10
+
+
 def download_not_available_images():
     with sqlite3.connect(DATABASE_PATH) as conn:
         images_to_download = (
@@ -189,12 +198,18 @@ def download_not_available_images():
             )
             .fetchall()
         )
-        for shoe_uuid, shoe_imageUrl in images_to_download:
+
+        def process_shoe(shoe_data):
+            shoe_uuid, shoe_image_url = shoe_data
             if os.path.exists(os.path.join(IMAGE_PATH, shoe_uuid)):
                 logger.info(
-                    f"Already downloaded images for shoe {shoe_uuid}, skipping download."
+                    f"Images for shoe {shoe_uuid} already downloaded. Skipping."
                 )
-                continue
-            download_first_image(shoe_imageUrl, shoe_uuid)
-            gif_process = Process(target=make_gif, args=(shoe_imageUrl, shoe_uuid))
-            gif_process.start()
+                return
+            download_first_image(shoe_image_url, shoe_uuid)
+            make_gif(shoe_image_url, shoe_uuid)
+
+        with ThreadPoolExecutor(max_workers=MAX_THREADS) as executor:
+            executor.map(process_shoe, images_to_download)
+
+    logging.info("Finished downloading")

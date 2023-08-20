@@ -7,20 +7,18 @@ import { DndProvider, useDrag, useDrop } from 'react-dnd';
 
 const URL = 'http://localhost:8000/';
 
-
 function MainScreen() {
     const [users, setUsers] = useState([]);
     const [portfolio, setPortfolio] = useState([]);
     const [selectedUserId, setSelectedUserId] = useState(localStorage.getItem('userId') || '1');
+    const [selectedUser, setSelectedUser] = useState(null);
+
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedShoe, setSelectedShoe] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
-    const [selectedSize, setSelectedSize] = useState('');
     const [isSizeModalOpen, setIsSizeModalOpen] = useState(false);
-
-
 
     axios.defaults.headers['ngrok-skip-browser-warning'] = 'true';
 
@@ -30,51 +28,63 @@ function MainScreen() {
     }
 
     useEffect(() => {
-
         axios.get(URL + 'users').then(response => {
-            setUsers(response.data);
-            handleUserClick(selectedUserId);
+            const fetchedUsers = response.data;
+            setUsers(fetchedUsers);
+            
+            let currentUserId = localStorage.getItem('userId') || fetchedUsers[0].id.toString();
+            
+            const currentUser = fetchedUsers.find(user => user.id.toString() === currentUserId);
+            setSelectedUser(currentUser);
+            setSelectedUserId(currentUser.id.toString());
+    
+        }).catch(error => {
+            console.error("Error fetching users:", error);
         });
     }, []);
-
+    
+    useEffect(() => {
+        if (selectedUserId) {
+            handleUserClick(selectedUserId);
+        }
+    }, [selectedUserId]);
+    
     const handleSearch = () => {
         axios.get(URL + 'search/name/' + searchTerm, { name: searchTerm }).then(response => {
             setSearchResults(response.data);
         });
     };
-
-
-    const handleUserClick = (userId) => {
+    const handleUserClick = async (userIdString) => {
+        const userId = parseInt(userIdString, 10);
+    
+        const currentUser = users.find(user => user.id === userId);
+        setSelectedUser(currentUser);
         setSelectedUserId(userId);
-        localStorage.setItem('userId', userId);
-        axios.defaults.headers['X-User-ID'] = userId;
-
-        axios.get(URL + `user/${userId}/portfolio`).then(response => {
+    
+        localStorage.setItem('userId', userIdString);
+        axios.defaults.headers['X-User-ID'] = userIdString;
+    
+        try {
+            const response = await axios.get(URL + `user/${userId}/portfolio`);
             setPortfolio(response.data);
-        });
+        } catch (error) {
+            console.error("Failed to fetch portfolio for user:", error);
+        }
     };
-
+    
     const handleShoeClick = (shoe) => {
         setSelectedShoe(shoe);
         setIsModalOpen(true);
     }
-
-
-
     const addShoeToPortfolio = () => {
-        if (!selectedSize) {
-            alert('Please select a size before adding to the portfolio.');
-            return;
-        }
 
         axios.post(URL + 'user/addToPortfolio', {
             userId: selectedUserId,
             shoeTitle: selectedShoe.title,
-            shoeSize: selectedSize
         })
             .then(response => {
                 if (response.status !== 200) {
-                    alert('Failed to add shoe to portfolio. Please try again.');
+                    alert('Failed to add item to portfolio. Please try again.');
                 }
 
                 setIsSizeModalOpen(false);
@@ -91,7 +101,7 @@ function MainScreen() {
         if (!window.confirm("Are you sure you want to delete this shoe from your portfolio?")) {
             return;
         }
-        axios.delete(URL + `user/${selectedUserId}/portfolio/${selectedShoe.urlKey}`)
+        axios.delete(URL + `user/${selectedUserId}/portfolio/${selectedShoe.uuid}`)
             .then(response => {
                 setIsModalOpen(false);
                 handleUserClick(selectedUserId);
@@ -102,8 +112,6 @@ function MainScreen() {
             });
     }
 
-
-
     const DraggableShoeCard = ({ shoe, index, moveShoe }) => {
         const [{ isDragging }, dragRef] = useDrag({
             type: 'SHOE',
@@ -112,7 +120,6 @@ function MainScreen() {
                 isDragging: !!monitor.isDragging()
             })
         });
-
         const [, dropRef] = useDrop({
             accept: 'SHOE',
             hover: (draggedItem) => {
@@ -122,15 +129,13 @@ function MainScreen() {
                 }
             }
         });
-
         const ref = (node) => {
             dragRef(node);
             dropRef(node);
         }
-
         return (
             <div
-                key={shoe.urlKey}
+                key={shoe.uuid}
                 className="shoe-card"
                 onClick={() => handleShoeClick(shoe)}
                 ref={ref}
@@ -139,7 +144,7 @@ function MainScreen() {
                 <div className="image-container">
                     <img src={URL + "images/" + shoe.uuid + "/img/01.png"} onError={({ currentTarget }) => {
                         currentTarget.onerror = null;
-                        currentTarget.src = selectedShoe.imageUrl;
+                        currentTarget.src = shoe.imageUrl;
                     }}></img>
                     <img className="gif" src={URL + "images/" + shoe.uuid + "/gif/" + shoe.uuid + ".gif"} onError={({ currentTarget }) => {
                         currentTarget.onerror = null;
@@ -152,13 +157,16 @@ function MainScreen() {
             </div>
         );
     };
-
     const moveShoe = (fromIndex, toIndex) => {
         const updatedPortfolio = [...portfolio];
         const [movedShoe] = updatedPortfolio.splice(fromIndex, 1);
         updatedPortfolio.splice(toIndex, 0, movedShoe);
         setPortfolio(updatedPortfolio);
+    
+        const updatedOrder = updatedPortfolio.map(shoe => shoe.uuid);
+        axios.post(URL + `user/${selectedUserId}/portfolio/reorder`, { shoe_uuids: updatedOrder });
     };
+    
 
     const DroppablePortfolio = ({ children, onDrop }) => {
         const [, dropRef] = useDrop({
@@ -171,44 +179,76 @@ function MainScreen() {
                 return onDrop(item, portfolio.length);
             }
         });
-
         return (
-            <div ref={dropRef} className="shoe-grid">
-                {React.Children.map(children, child => child)}
+            <div className="main-grid">
+                <div ref={dropRef} className="shoe-grid">
+                    {React.Children.map(children, child => child)}
+                </div>
             </div>
         );
     };
-
     const handleDrop = (shoe, index) => {
-        const updatedPortfolio = portfolio.filter(item => item.urlKey !== shoe.urlKey);
+        const updatedPortfolio = portfolio.filter(item => item.uuid !== shoe.uuid);
 
         updatedPortfolio.splice(index, 0, shoe);
 
         setPortfolio(updatedPortfolio);
     };
 
+    const getRandomShoe = () => {
+        if (portfolio.length === 0) {
+           alert('No items in the portfolio to select from!');
+           return;
+        }
+        const randomIndex = Math.floor(Math.random() * portfolio.length);
+        const randomShoe = portfolio[randomIndex];
+        setSelectedShoe(randomShoe);
+        setIsModalOpen(true);
+     }
+
+     const Navbar = ({ users, handleUserClick, selectedUserId, selectedUser }) => (
+        <div className="navbar">
+            <div className="navbar-brand">
+                Sneaker Portfolio
+            </div>
+            
+            <div className="user-dropdown">
+                <span style={{ fontSize: '24px', cursor: 'pointer' }}>
+                    {selectedUser ? selectedUser.name : 'Loading...'}
+                </span>
+                <div className="user-dropdown-content">
+                    {users.map(user => (
+                        <a
+                            key={user.id}
+                            onClick={() => handleUserClick(user.id)}
+                            style={selectedUserId === user.id.toString() ? { backgroundColor: '#ddd' } : {}}
+                        >
+                            {user.name}
+                        </a>
+                    ))}
+                </div>
+            </div>
+    
+            <div className="action-buttons">
+                <button className="action-button add" onClick={() => setIsSearchModalOpen(true)}>+</button>
+                <button className="action-button random" onClick={getRandomShoe}>🎲 </button>
+            </div>
+        </div>
+    );
+    
+    
+
+
+    
     return (
         <DndProvider backend={HTML5Backend}>
             <div className="App">
-                <div className="App-header">
-                    <h1>Sneaker portfolio</h1>
-                    <div className="user-buttons">
-                        {users.map(user => (
-                            <button className="button"
-                                key={user.id}
-                                onClick={() => handleUserClick(user.id)}
-                                style={selectedUserId === user.id.toString() ? { backgroundColor: 'black' } : {}}
-                            >
-                                {user.name}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-                <div style={{ marginTop: '20px' }}>
-                    <button className="button" onClick={() => setIsSearchModalOpen(true)}>
-                        Add Shoe
-                    </button>
-                </div>
+            <Navbar 
+                users={users} 
+                handleUserClick={handleUserClick} 
+                selectedUser={selectedUser} 
+            />
+
 
                 {isSearchModalOpen && (
                     <div className="search-modal-overlay">
@@ -222,7 +262,7 @@ function MainScreen() {
                                     type="text"
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    placeholder="Search for a shoe..."
+                                    placeholder="Search for an item..."
                                     style={{
                                         width: '100%',
                                         padding: '12px',
@@ -241,13 +281,12 @@ function MainScreen() {
 
                             <div className="shoe-grid">
                                 {searchResults.map(shoe => (
-                                    <div key={shoe.urlKey} className="shoe-card" onClick={() => showSizeModal(shoe)}>
+                                    <div key={shoe.uuid} className="shoe-card" onClick={() => showSizeModal(shoe)}>
                                         <div className="image-container">
                                             <img src={shoe.thumbUrl} alt={shoe.title} />
                                         </div>
                                         <div className="shoe-info">
                                             <h4>{shoe.title}</h4>
-
                                         </div>
                                     </div>
                                 ))}
@@ -258,32 +297,17 @@ function MainScreen() {
                         </div>
                     </div>
                 )}
-
                 {isSizeModalOpen && (
                     <div className="modal-overlay" onClick={() => setIsSizeModalOpen(false)}>
                         <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                            <button className="button" onClick={() => setIsSizeModalOpen(false)}>
+                                Close
+                            </button>
                             <h3>Select Size for {selectedShoe.title}</h3>
                             <div style={{ marginTop: '20px' }}>
                                 <div className="image-container">
                                     <img src={selectedShoe.imageUrl} alt={selectedShoe.title} />
                                 </div>
-                                <select onChange={(e) => setSelectedSize(e.target.value)}>
-
-                                    <option value="40">40</option>
-                                    <option value="40.5">40.5</option>
-                                    <option value="41">41</option>
-                                    <option value="42">42</option>
-                                    <option value="42">42.5</option>
-                                    <option value="43">43</option>
-                                    <option value="44">44</option>
-                                    <option value="44.5">44.5</option>
-                                    <option value="45">45</option>
-                                    <option value="45.5">45.5</option>
-                                    <option value="46">46</option>
-                                    <option value="47">47</option>
-                                    <option value="47.5">47.5</option>
-                                    <option value="48.5">48.5</option>
-                                </select>
                             </div>
                             <div style={{ marginTop: '20px' }}>
                                 <button className="button" onClick={addShoeToPortfolio}>
@@ -292,7 +316,7 @@ function MainScreen() {
                             </div>
                             <div style={{ marginTop: '20px' }}>
                                 <button className="button" onClick={() => setIsSizeModalOpen(false)}>
-                                    Cancel
+                                    Close
                                 </button>
                             </div>
                         </div>
@@ -301,10 +325,10 @@ function MainScreen() {
                 <div>
                     {selectedUserId && (
                         <>
-                            <h3>Displaying portfolio {selectedUserId}</h3>
+
                             <DroppablePortfolio onDrop={handleDrop}>
                                 {portfolio.map((shoe, idx) => (
-                                    <DraggableShoeCard shoe={shoe} key={shoe.urlKey} index={idx} moveShoe={moveShoe} />
+                                    <DraggableShoeCard shoe={shoe} key={shoe.uuid} index={idx} moveShoe={moveShoe} />
                                 ))}
                             </DroppablePortfolio>
                         </>
@@ -313,6 +337,7 @@ function MainScreen() {
                 {isModalOpen && (
                     <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
                         <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                        <button className="button" onClick={() => setIsModalOpen(false)}>Close</button>
                             <h3 className="modal-title">{selectedShoe.title}</h3>
                             <div className="modal-gif">
                                 <img src={URL + "images/" + selectedShoe.uuid + "/gif/" + selectedShoe.uuid + ".gif"} alt={selectedShoe.title}
@@ -345,9 +370,6 @@ function MainScreen() {
                         </div>
                     </div>
                 )}
-
-
-
             </div>
         </DndProvider>
     );

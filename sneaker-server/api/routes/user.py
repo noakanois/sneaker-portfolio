@@ -11,7 +11,6 @@ router_user = APIRouter()
 class PortfolioData(BaseModel):
     userId: int
     shoeTitle: str
-    shoeSize: float
 
 
 @router_user.get("/users")
@@ -26,41 +25,37 @@ async def add_to_portfolio(data: PortfolioData):
     with sqlite3.connect(DATABASE_PATH) as conn:
         shoe_uuid, shoe_image_url = (
             conn.cursor()
-            .execute("SELECT uuid,imageUrl FROM shoes WHERE title = ?", (data.shoeTitle,))
+            .execute(
+                "SELECT uuid,imageUrl FROM shoes WHERE title = ?", (data.shoeTitle,)
+            )
             .fetchone()
         )
-      
+
         if not shoe_uuid:
             raise HTTPException(400, "Shoe not found")
 
         conn.cursor().execute(
-            "INSERT INTO portfolios (user_id, shoe_uuid, shoe_size) VALUES (?, ?, ?)",
-            (data.userId, shoe_uuid, data.shoeSize),
+            "INSERT INTO portfolios (user_id, shoe_uuid) VALUES (?, ?)",
+            (data.userId, shoe_uuid),
         )
         conn.commit()
-        download_first_image(shoe_image_url, shoe_uuid) # Ensure we always have first image for showing in collection
-        gif_process = Process(target=make_gif,args=(shoe_image_url, shoe_uuid))
+        download_first_image(
+            shoe_image_url, shoe_uuid
+        )  # Ensure we always have first image for showing in collection
+        gif_process = Process(target=make_gif, args=(shoe_image_url, shoe_uuid))
         gif_process.start()
     return {"status": "success", "message": "Shoe added to portfolio successfully!"}
 
 
-@router_user.delete("/user/{user_id}/portfolio/{urlKey}")
-async def delete_from_portfolio(user_id: int, urlKey: str):
+@router_user.delete("/user/{user_id}/portfolio/{shoe_uuid}")
+async def delete_from_portfolio(user_id: int, shoe_uuid: str):
     with sqlite3.connect(DATABASE_PATH) as conn:
-        shoe = (
-            conn.cursor()
-            .execute("SELECT uuid FROM shoes WHERE urlKey = ?", (urlKey,))
-            .fetchone()
-        )
-
-        if not shoe:
-            raise HTTPException(404, "Shoe not found")
-
+        
         deleted_rows = (
             conn.cursor()
             .execute(
                 "DELETE FROM portfolios WHERE user_id = ? AND shoe_uuid = ?",
-                (user_id, shoe[0]),
+                (user_id, shoe_uuid),
             )
             .rowcount
         )

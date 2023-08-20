@@ -5,11 +5,12 @@ from fastapi.staticfiles import StaticFiles
 from api.routes.portfolio import router_portfolio
 from api.routes.search import router_search
 from api.routes.user import router_user
-
+import threading
 
 import sqlite3
 from api.db_utils import execute_sql, table_empty
 from api.img_utils import download_not_available_images
+import logging
 
 app = FastAPI()
 app.include_router(router_portfolio)
@@ -51,7 +52,10 @@ async def startup_db():
     for file, table in zip(data_files, tables):
         if table_empty(table):
             execute_sql(file)
-    download_not_available_images()
+    thread = threading.Thread(target=download_not_available_images)
+    thread.start()
+    logging.info("done downloading/moved after downloading")
+
 
 @app.get("/")
 def serve_root_files():
