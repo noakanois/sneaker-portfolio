@@ -300,11 +300,13 @@
   color: white;
   position: relative;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
+  user-select: none;
 }
 .navbar-brand {
   font-size: 28px; 
   font-weight: bold;
   color: var(--primary-color);
+  user-select: none;
 }
 
 .user-dropdown {
