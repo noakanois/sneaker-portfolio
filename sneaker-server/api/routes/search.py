@@ -26,7 +26,6 @@ QUERY_INSERT_SHOE = """
 def search_name(name: str):
     with sqlite3.connect(DATABASE_PATH) as conn:
         results = get_search_json(name)
-
         for r in results:
             shoe_uuid = uuid.uuid5(uuid.NAMESPACE_X500, f"{r['title']}{r['urlKey']}")
             conn.cursor().execute(

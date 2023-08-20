@@ -16,7 +16,6 @@ function MainScreen() {
     const [searchTerm, setSearchTerm] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
-    const [selectedSize, setSelectedSize] = useState('');
     const [isSizeModalOpen, setIsSizeModalOpen] = useState(false);
 
     axios.defaults.headers['ngrok-skip-browser-warning'] = 'true';
@@ -54,19 +53,14 @@ function MainScreen() {
         setIsModalOpen(true);
     }
     const addShoeToPortfolio = () => {
-        if (!selectedSize) {
-            alert('Please select a size before adding to the portfolio.');
-            return;
-        }
 
         axios.post(URL + 'user/addToPortfolio', {
             userId: selectedUserId,
             shoeTitle: selectedShoe.title,
-            shoeSize: selectedSize
         })
             .then(response => {
                 if (response.status !== 200) {
-                    alert('Failed to add shoe to portfolio. Please try again.');
+                    alert('Failed to add item to portfolio. Please try again.');
                 }
 
                 setIsSizeModalOpen(false);
@@ -126,7 +120,7 @@ function MainScreen() {
                 <div className="image-container">
                     <img src={URL + "images/" + shoe.uuid + "/img/01.png"} onError={({ currentTarget }) => {
                         currentTarget.onerror = null;
-                        currentTarget.src = selectedShoe.imageUrl;
+                        currentTarget.src = shoe.imageUrl;
                     }}></img>
                     <img className="gif" src={URL + "images/" + shoe.uuid + "/gif/" + shoe.uuid + ".gif"} onError={({ currentTarget }) => {
                         currentTarget.onerror = null;
@@ -162,8 +156,10 @@ function MainScreen() {
             }
         });
         return (
-            <div ref={dropRef} className="shoe-grid">
-                {React.Children.map(children, child => child)}
+            <div className="main-grid">
+                <div ref={dropRef} className="shoe-grid">
+                    {React.Children.map(children, child => child)}
+                </div>
             </div>
         );
     };
@@ -177,7 +173,7 @@ function MainScreen() {
 
     const getRandomShoe = () => {
         if (portfolio.length === 0) {
-           alert('No shoes in the portfolio to select from!');
+           alert('No items in the portfolio to select from!');
            return;
         }
         const randomIndex = Math.floor(Math.random() * portfolio.length);
@@ -205,10 +201,10 @@ function MainScreen() {
                 </div>
                 <div style={{ marginTop: '20px' }}>
                     <button className="button" onClick={() => setIsSearchModalOpen(true)}>
-                        Add Shoe
+                        Add Item
                     </button>
                     <button className="button" onClick={getRandomShoe} style={{ marginLeft: '10px' }}>
-                        Random Shoe
+                        Random Item
                     </button>
                     </div>
 
@@ -225,7 +221,7 @@ function MainScreen() {
                                     type="text"
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    placeholder="Search for a shoe..."
+                                    placeholder="Search for an item..."
                                     style={{
                                         width: '100%',
                                         padding: '12px',
@@ -263,27 +259,14 @@ function MainScreen() {
                 {isSizeModalOpen && (
                     <div className="modal-overlay" onClick={() => setIsSizeModalOpen(false)}>
                         <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                            <button className="button" onClick={() => setIsSizeModalOpen(false)}>
+                                Close
+                            </button>
                             <h3>Select Size for {selectedShoe.title}</h3>
                             <div style={{ marginTop: '20px' }}>
                                 <div className="image-container">
                                     <img src={selectedShoe.imageUrl} alt={selectedShoe.title} />
                                 </div>
-                                <select onChange={(e) => setSelectedSize(e.target.value)}>
-                                    <option value="40">40</option>
-                                    <option value="40.5">40.5</option>
-                                    <option value="41">41</option>
-                                    <option value="42">42</option>
-                                    <option value="42">42.5</option>
-                                    <option value="43">43</option>
-                                    <option value="44">44</option>
-                                    <option value="44.5">44.5</option>
-                                    <option value="45">45</option>
-                                    <option value="45.5">45.5</option>
-                                    <option value="46">46</option>
-                                    <option value="47">47</option>
-                                    <option value="47.5">47.5</option>
-                                    <option value="48.5">48.5</option>
-                                </select>
                             </div>
                             <div style={{ marginTop: '20px' }}>
                                 <button className="button" onClick={addShoeToPortfolio}>
@@ -292,7 +275,7 @@ function MainScreen() {
                             </div>
                             <div style={{ marginTop: '20px' }}>
                                 <button className="button" onClick={() => setIsSizeModalOpen(false)}>
-                                    Cancel
+                                    Close
                                 </button>
                             </div>
                         </div>

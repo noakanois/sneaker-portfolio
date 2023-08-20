@@ -1,8 +1,6 @@
 import requests
 from fake_useragent import UserAgent
 import json
-import os
-import time
 import re
 
 from bs4 import BeautifulSoup
@@ -39,10 +37,10 @@ def get_search_json(shoe_name):
         except:
             continue
 
-    sneakers = []
+    items = []
     for item in new_data:
         node = item["node"]
-        if node["productCategory"] == "sneakers":
+        if node["productCategory"] in ["sneakers", "watches"]:
             sneaker_info = {
                 "name": node["name"],
                 "title": node["title"],
@@ -62,6 +60,5 @@ def get_search_json(shoe_name):
             }
             for trait in node["productTraits"]:
                 sneaker_info[trait["name"]] = trait["value"]
-            sneakers.append(sneaker_info)
-
-    return sneakers
+            items.append(sneaker_info)
+    return items

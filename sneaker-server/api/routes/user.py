@@ -11,7 +11,6 @@ router_user = APIRouter()
 class PortfolioData(BaseModel):
     userId: int
     shoeTitle: str
-    shoeSize: float
 
 
 @router_user.get("/users")
@@ -36,8 +35,8 @@ async def add_to_portfolio(data: PortfolioData):
             raise HTTPException(400, "Shoe not found")
 
         conn.cursor().execute(
-            "INSERT INTO portfolios (user_id, shoe_uuid, shoe_size) VALUES (?, ?, ?)",
-            (data.userId, shoe_uuid, data.shoeSize),
+            "INSERT INTO portfolios (user_id, shoe_uuid) VALUES (?, ?)",
+            (data.userId, shoe_uuid),
         )
         conn.commit()
         download_first_image(

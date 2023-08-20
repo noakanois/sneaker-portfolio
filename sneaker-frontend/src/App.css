@@ -271,18 +271,18 @@
   height: 100%;
 }
 
-.shoe-card img.gif {
+
+.main-grid .shoe-card img.gif {
   display: none;  
 }
 
-.shoe-card:hover img.gif {
+.main-grid .shoe-card:hover img.gif {
   display: block;  
 }
 
-.shoe-card:hover img:not(.gif) {
+.main-grid .shoe-card:hover img:not(.gif) {
   display: none; 
 }
-
 
 @keyframes App-logo-spin {
   from {

@@ -8,7 +8,7 @@ router_portfolio = APIRouter()
 
 QUERY_GET_PORTFOLIO = """
     SELECT 
-        p.shoe_size, p.favorite, s.uuid, s.name, s.title, s.model, s.brand, s.urlKey, s.thumbUrl, s.smallImageUrl, s.imageUrl, s.description, s.retail_price, s.release_date, s.created_at
+        p.favorite, s.uuid, s.name, s.title, s.model, s.brand, s.urlKey, s.thumbUrl, s.smallImageUrl, s.imageUrl, s.description, s.retail_price, s.release_date, s.created_at
     FROM
         portfolios p
     JOIN 
@@ -35,21 +35,20 @@ async def get_user_portfolio(user_id: int):
 
     return [
         {
-            "shoe_size": r[0],
-            "favorite": r[1],
-            "uuid": r[2],
-            "name": r[3],
-            "title": r[4],
-            "model": r[5],
-            "brand": r[6],
-            "urlKey": r[7],
-            "thumbUrl": r[8],
-            "smallImageUrl": r[9],
-            "imageUrl": r[10],
-            "description": r[11],
-            "retail_price": r[12],
-            "release_date": r[13],
-            "created_at": r[14],
+            "favorite": r[0],
+            "uuid": r[1],
+            "name": r[2],
+            "title": r[3],
+            "model": r[4],
+            "brand": r[5],
+            "urlKey": r[6],
+            "thumbUrl": r[7],
+            "smallImageUrl": r[8],
+            "imageUrl": r[9],
+            "description": r[10],
+            "retail_price": r[11],
+            "release_date": r[12],
+            "created_at": r[13],
         }
         for r in results
     ]
