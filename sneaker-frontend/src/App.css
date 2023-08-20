@@ -276,7 +276,7 @@
 }
 
 .main-grid {
-  margin-top: -20px; 
+  margin-top: -10px; 
 }
 
 .main-grid .shoe-card img.gif {
@@ -314,6 +314,7 @@
   color: var(--primary-color); 
   font-weight: bold;
   margin: 0 20px;
+  user-select: none;
 }
 
 .user-dropdown::after {
