@@ -5,6 +5,7 @@ from fastapi.staticfiles import StaticFiles
 from api.routes.portfolio import router_portfolio
 from api.routes.search import router_search
 from api.routes.user import router_user
+from api.routes.favorites import router_favorite
 import threading
 
 import sqlite3
@@ -16,7 +17,7 @@ app = FastAPI()
 app.include_router(router_portfolio)
 app.include_router(router_search)
 app.include_router(router_user)
-
+app.include_router(router_favorite)
 
 app.mount(
     "/static", StaticFiles(directory="../sneaker-frontend/build/static"), name="static"
