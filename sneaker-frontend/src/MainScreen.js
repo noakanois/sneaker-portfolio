@@ -13,7 +13,6 @@ function MainScreen() {
     const [portfolio, setPortfolio] = useState([]);
     const [selectedUserId, setSelectedUserId] = useState(localStorage.getItem('userId') || '1');
     const [selectedUser, setSelectedUser] = useState(null);
-    const [isClick, setClick] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedShoe, setSelectedShoe] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
@@ -177,8 +176,6 @@ function MainScreen() {
                 </div>
                 <div className="favourite-heart"> 
                     <Heart isClick={portfolio[getPortfolioIndex({uuid: shoe.uuid })]["favorite"]} onClick={(event) => {toggleFavoriteStatus({uuid: shoe.uuid }); event.stopPropagation()}} />
-
-
                     </div>
                 <div className="shoe-info">
                     <h4>{shoe.title}</h4>
