@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Heart from "react-animated-heart";
 import axios from 'axios';
 import './App.css';
 
@@ -12,7 +13,6 @@ function MainScreen() {
     const [portfolio, setPortfolio] = useState([]);
     const [selectedUserId, setSelectedUserId] = useState(localStorage.getItem('userId') || '1');
     const [selectedUser, setSelectedUser] = useState(null);
-
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedShoe, setSelectedShoe] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
@@ -112,7 +112,9 @@ function MainScreen() {
             });
     }
 
-    const DraggableShoeCard = ({ shoe, index, moveShoe }) => {
+    
+
+    const DraggableShoeCard = ({ user, shoe, index, moveShoe }) => {
         const [{ isDragging }, dragRef] = useDrag({
             type: 'SHOE',
             item: { index },
@@ -133,6 +135,26 @@ function MainScreen() {
             dragRef(node);
             dropRef(node);
         }
+        const getPortfolioIndex = ({uuid}) => {
+            return portfolio.findIndex(item => item.uuid === uuid);
+        }
+        const getFavoriteStatus = ({uuid}) => {
+            const index = getPortfolioIndex({uuid});
+            return portfolio[index]["favorite"];
+        }
+        const toggleFavoriteStatus = ({uuid}) => {
+            const status = !getFavoriteStatus({uuid})
+            axios.post(URL + `favorites/${selectedUserId}/set/${uuid}/${status}`);
+            const updatedPortfolio = [...portfolio];
+            const index = getPortfolioIndex({uuid});
+            updatedPortfolio[index] = {
+                ...updatedPortfolio[index],
+                favorite: !updatedPortfolio[index].favorite 
+              };
+            setPortfolio(updatedPortfolio);
+                };
+            
+                
         return (
             <div
                 key={shoe.uuid}
@@ -150,7 +172,11 @@ function MainScreen() {
                         currentTarget.onerror = null;
                         currentTarget.src = shoe.imageUrl;
                     }}></img>
+                    
                 </div>
+                <div className="favourite-heart"> 
+                    <Heart isClick={portfolio[getPortfolioIndex({uuid: shoe.uuid })]["favorite"]} onClick={(event) => {toggleFavoriteStatus({uuid: shoe.uuid }); event.stopPropagation()}} />
+                    </div>
                 <div className="shoe-info">
                     <h4>{shoe.title}</h4>
                 </div>
