@@ -202,7 +202,7 @@ def trim_image(path):
     cropped_image.save(path)
 
 
-MAX_THREADS = 15
+MAX_THREADS = 10
 
 
 def download_not_available_images():
