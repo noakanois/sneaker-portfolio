@@ -14,7 +14,7 @@ IMAGE_WIDTH = 800
 INDEX_LENGTH = 2
 WHITE_THRESHOLD = 230
 
-logging.basicConfig(filename="logs.txt",filemode='a', level=logging.DEBUG)
+
 logger = logging.getLogger()
 
 
@@ -22,15 +22,15 @@ def convert_url_to_gif_url(image_url: str):
     IMAGE_URL_INDEX = 4
     url_key = (
         image_url.split("/")[IMAGE_URL_INDEX]
-        .replace("-Product.png","")
+        .replace("-Product.png", "")
         .replace("-Product.jpg", "")
         .replace("-Product_V2.jpg", "")
         .replace("-Product_V2.png", "")
         .replace("_V2", "")
-        .replace(".png","")
-        .replace(".jpg","")
+        .replace(".png", "")
+        .replace(".jpg", "")
     )
-    
+
     return f"https://images.stockx.com/360/{url_key }/Images/{url_key}/Lv2/img01.jpg?w={IMAGE_WIDTH}"
 
 
@@ -41,7 +41,7 @@ def download_first_image(original_image_url, shoe_uuid):
     img_folder_path = os.path.join(IMAGE_PATH, shoe_uuid, "img")
     os.makedirs(img_folder_path, exist_ok=True)
     image_save_path = os.path.join(img_folder_path, "01.png")
-   
+
     if os.path.exists(image_save_path):
         logger.info(f"First image already exists. Skipping download.")
         return
@@ -61,13 +61,17 @@ def download_first_image(original_image_url, shoe_uuid):
         original_image_url_split = original_image_url.split("?")
         original_image_url = f"{original_image_url_split[0]}?w={IMAGE_WIDTH}"
         disallow_transperency = "&bg=FFFFFF"
-        response = requests.get(f"{original_image_url}{disallow_transperency}", stream=True)
+        response = requests.get(
+            f"{original_image_url}{disallow_transperency}", stream=True
+        )
 
         if response.status_code == 200:
             with open(image_save_path, "wb") as file:
                 response.raw.decode_content = True
                 shutil.copyfileobj(response.raw, file)
-                logger.info(f"Successfully saved first image for shoe {shoe_uuid}. (Static) Non Static URL: {image_url}")
+                logger.info(
+                    f"Successfully saved first image for shoe {shoe_uuid}. (Static) Non Static URL: {image_url}"
+                )
                 return "STATIC"
         else:
             logger.info(f"Failed to download first image from {original_image_url}")
@@ -75,13 +79,15 @@ def download_first_image(original_image_url, shoe_uuid):
 
 
 def get_images(original_image_link, shoe_uuid):
-    status_string = download_first_image(original_image_link,shoe_uuid)
-    
+    status_string = download_first_image(original_image_link, shoe_uuid)
+
     if status_string == "ERROR":
         logger.error(f"Unable to download the first image for shoe_uuid {shoe_uuid}.")
         return 0
     elif status_string == "STATIC":
-        logger.info(f"GIF not available for shoe_uuid {shoe_uuid}, only leaving static image.")
+        logger.info(
+            f"GIF not available for shoe_uuid {shoe_uuid}, only leaving static image."
+        )
         return 1
     logger.info(f"GIF available for the shoe_uuid {shoe_uuid}, downloading all images.")
     image_url = convert_url_to_gif_url(original_image_link)
@@ -123,7 +129,6 @@ def get_images(original_image_link, shoe_uuid):
 
 
 def make_gif(image_url: str, uuid: str):
-    
     logger.info(f"Downloading images for {uuid}.")
     amount_images = get_images(image_url, uuid)
     if amount_images == 0:
@@ -132,7 +137,7 @@ def make_gif(image_url: str, uuid: str):
     elif amount_images == 1:
         logger.info(f"Successfully downloaded {amount_images} images for {uuid}.")
         logger.info(f"Not creating gif for {uuid} because only one image is available.")
-        trim_image(os.path.join(IMAGE_PATH,uuid,"img","01.png"))
+        trim_image(os.path.join(IMAGE_PATH, uuid, "img", "01.png"))
         return
     logger.info(f"Successfully downloaded {amount_images} images for {uuid}.")
     gif_folder_path = os.path.join(IMAGE_PATH, uuid, "gif")
@@ -147,7 +152,7 @@ def join_images(uuid, img_folder_path, gif_folder_path):
         Image.open(f"{img_folder_path}/{str(i).zfill(INDEX_LENGTH)}.png")
         for i in range(1, NUM_IMAGES + 1)
     ]
- 
+
     os.mkdir(gif_folder_path)
     gif_path = os.path.join(gif_folder_path, f"{uuid}.gif")
     frames[0].save(
@@ -160,18 +165,18 @@ def join_images(uuid, img_folder_path, gif_folder_path):
     )
     logger.info(f"Successfully created gif for {uuid}.")
     delete_images(uuid)
-    trim_image(os.path.join(IMAGE_PATH,uuid,"img","01.png"))
+    trim_image(os.path.join(IMAGE_PATH, uuid, "img", "01.png"))
     logger.info(f"Successfully deleted unneccessary pictures for {uuid}.")
 
 
 def delete_images(uuid):
-    for i, file in enumerate(os.listdir(os.path.join(IMAGE_PATH,uuid,"img"))):
+    for i, file in enumerate(os.listdir(os.path.join(IMAGE_PATH, uuid, "img"))):
         if file == "01.png":
             continue
         logger.info(f"Removed image {str(i).zfill(INDEX_LENGTH)} for {uuid}")
-        remove_path = os.path.join(IMAGE_PATH,uuid,"img",file)
-        os.remove(remove_path) 
-  
+        remove_path = os.path.join(IMAGE_PATH, uuid, "img", file)
+        os.remove(remove_path)
+
 
 def is_row_white(row, threshold=WHITE_THRESHOLD):
     return all(pixel >= threshold for pixel in row) or all(pixel == 0 for pixel in row)
@@ -221,7 +226,7 @@ def download_not_available_images():
 
         def process_shoe(shoe_data):
             shoe_uuid, shoe_image_url = shoe_data
-            if os.path.exists(os.path.join(IMAGE_PATH, shoe_uuid,"img","01.png")):
+            if os.path.exists(os.path.join(IMAGE_PATH, shoe_uuid, "img", "01.png")):
                 logger.info(
                     f"Images for shoe {shoe_uuid} already downloaded. Skipping."
                 )
