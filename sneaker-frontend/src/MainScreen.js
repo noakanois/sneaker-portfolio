@@ -6,7 +6,7 @@ import './App.css';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 
-const URL = 'http://localhost:8000/';
+const URL = 'https://nsli.me/';
 
 function MainScreen() {
     const [users, setUsers] = useState([]);
