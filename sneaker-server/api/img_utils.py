@@ -40,11 +40,11 @@ def get_visuals_all_items():
     logging.info("Finished downloading")
 
 
-def get_visual_item(itemdata):
+def get_visual_item(itemdata, redownload=False):
     item_uuid, item_img_url = itemdata
     logging.info(f"Started downloading for {item_uuid}")
-    download_first_img(item_uuid, item_img_url, redownload=False)
-    download_360_images(item_uuid, item_img_url, redownload=False)
+    download_first_img(item_uuid, item_img_url, redownload)
+    download_360_images(item_uuid, item_img_url, redownload)
     make_gif(item_uuid)
     delete_images(item_uuid)
     logging.info(f"Finished downloading for {item_uuid}")
