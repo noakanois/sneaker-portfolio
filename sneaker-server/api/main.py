@@ -7,10 +7,10 @@ from api.routes.search import router_search
 from api.routes.user import router_user
 from api.routes.favorites import router_favorite
 import threading
-
+import os
 import sqlite3
 from api.db_utils import execute_sql, table_empty
-from api.img_utils import download_not_available_images
+from api.img_utils import get_visuals_all_items
 import logging
 
 app = FastAPI()
@@ -22,6 +22,8 @@ app.include_router(router_favorite)
 app.mount(
     "/static", StaticFiles(directory="../sneaker-frontend/build/static"), name="static"
 )
+
+os.makedirs("./img_data", exist_ok=True)
 app.mount("/images", StaticFiles(directory="./img_data"), name="images")
 
 app.add_middleware(
@@ -53,7 +55,7 @@ async def startup_db():
     for file, table in zip(data_files, tables):
         if table_empty(table):
             execute_sql(file)
-    thread = threading.Thread(target=download_not_available_images)
+    thread = threading.Thread(target=get_visuals_all_items)
     thread.start()
     logging.info("done downloading/moved after downloading")
 
