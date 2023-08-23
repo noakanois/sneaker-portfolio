@@ -39,6 +39,7 @@ def get_visuals_all_items():
 
     logging.info("Finished downloading")
 
+
 def get_visual_item(itemdata):
     item_uuid, item_img_url = itemdata
     logging.info(f"Started downloading for {item_uuid}")
@@ -47,8 +48,8 @@ def get_visual_item(itemdata):
     make_gif(item_uuid)
     delete_images(item_uuid)
     logging.info(f"Finished downloading for {item_uuid}")
-    
-    
+
+
 def download_first_img(item_uuid, img_url, redownload=True):
     img_folder_path = os.path.join(IMAGE_PATH, item_uuid, "img")
     os.makedirs(img_folder_path, exist_ok=True)
@@ -62,13 +63,13 @@ def download_first_img(item_uuid, img_url, redownload=True):
 
     if download_picture(img_360_url, first_img_path):
         return download_and_trim(first_img_path, item_uuid)
-    
+
     img_standard_url = f"{img_url.split('?')[0]}?w={IMAGE_WIDTH}"
     disallow_transparency = "&bg=FFFFFF"
 
     if download_picture(f"{img_standard_url}{disallow_transparency}", first_img_path):
         return download_and_trim(first_img_path, item_uuid)
-    
+
     return False
 
 
@@ -84,11 +85,11 @@ def download_360_images(item_uuid, img_url, redownload=True):
 
     if not redownload and os.path.exists(os.path.join(IMAGE_PATH, item_uuid, "gif")):
         return False
-    
+
     for i in range(1, NUM_IMAGES + 1):
         index = str(i).zfill(INDEX_LENGTH)
         img_save_path = os.path.join(img_folder_path, f"{index}.png")
-        
+
         img_url = convert_url_to_360_url(img_url, index)
         if download_picture(img_url, img_save_path):
             continue
@@ -103,7 +104,7 @@ def make_gif(uuid: str):
     if os.path.exists(gif_folder_path):
         return False
     logging.info(f"Creating gif for {uuid}.")
-    img_files = [f for f in os.listdir(img_folder_path) if f.endswith('.png')]
+    img_files = [f for f in os.listdir(img_folder_path) if f.endswith(".png")]
     num_images = len(img_files)
     frames = [
         Image.open(f"{img_folder_path}/{str(i).zfill(INDEX_LENGTH)}.png")
@@ -134,8 +135,8 @@ def delete_images(uuid):
             logging.info(f"Removed image {str(i).zfill(INDEX_LENGTH)} for {uuid}")
         except:
             pass
-            
-            
+
+
 def download_picture(img_url, save_path):
     logging.info(f"Download_picture with {img_url}")
     response = requests.get(img_url, stream=True)
@@ -147,7 +148,7 @@ def download_picture(img_url, save_path):
         return True
     logging.info(f"Failure download_picture with {img_url}")
     return False
-    
+
 
 def convert_url_to_360_url(image_url: str, index):
     IMAGE_URL_INDEX = 4
@@ -192,7 +193,6 @@ def trim_image(path):
 
     cropped_image = image.crop((0, top_crop, width, height - bottom_crop))
     cropped_image.save(path)
-
 
 
 if __name__ == "__main__":

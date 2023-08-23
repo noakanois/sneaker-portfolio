@@ -47,7 +47,7 @@ async def add_to_portfolio(data: PortfolioData):
 @router_user.delete("/user/{user_id}/portfolio/{shoe_uuid}")
 async def delete_from_portfolio(user_id: int, shoe_uuid: str):
     with sqlite3.connect(DATABASE_PATH) as conn:
-        
+
         deleted_rows = (
             conn.cursor()
             .execute(
