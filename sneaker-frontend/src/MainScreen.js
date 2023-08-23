@@ -122,6 +122,14 @@ function MainScreen() {
                 isDragging: !!monitor.isDragging()
             })
         });
+
+        const loadGifOnHover = (event) => {
+            const gifElement = event.currentTarget.querySelector('.gif');
+            if (gifElement && !gifElement.src) {
+                gifElement.src = gifElement.dataset.src;
+            }
+        };
+        
         const [, dropRef] = useDrop({
             accept: 'SHOE',
             hover: (draggedItem) => {
@@ -156,6 +164,7 @@ function MainScreen() {
             
                 
         return (
+            <div key={shoe.uuid} className="shoe-card" onClick={() => handleShoeClick(shoe)} ref={ref} style={isDragging?{opacity:0.5}:{}} onMouseEnter={loadGifOnHover}>
             <div
                 key={shoe.uuid}
                 className="shoe-card"
@@ -168,7 +177,7 @@ function MainScreen() {
                         currentTarget.onerror = null;
                         currentTarget.src = shoe.imageUrl;
                     }}></img>
-                    <img className="gif" src={URL + "images/" + shoe.uuid + "/gif/" + shoe.uuid + ".gif"} onError={({ currentTarget }) => {
+                    <img className="gif" data-src={URL+"images/"+shoe.uuid+ "/gif/" +shoe.uuid+ ".gif"} onError={({ currentTarget }) => {
                         currentTarget.onerror = null;
                         currentTarget.src = shoe.imageUrl;
                     }}></img>
@@ -180,6 +189,7 @@ function MainScreen() {
                 <div className="shoe-info">
                     <h4>{shoe.title}</h4>
                 </div>
+            </div>
             </div>
         );
     };
@@ -262,8 +272,6 @@ function MainScreen() {
         </div>
     );
     
-    
-
 
     
     return (
