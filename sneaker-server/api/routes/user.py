@@ -2,7 +2,8 @@ from fastapi import APIRouter, HTTPException
 from ..db_utils import DATABASE_PATH
 from pydantic import BaseModel
 import sqlite3
-from api.img_utils import download_first_image, make_gif
+import os
+from api.img_utils import download_first_image, make_gif, get_images, delete_images, trim_image, IMAGE_PATH
 from multiprocessing import Process
 
 router_user = APIRouter()
@@ -39,10 +40,14 @@ async def add_to_portfolio(data: PortfolioData):
             (data.userId, shoe_uuid),
         )
         conn.commit()
-        download_first_image(
-            shoe_image_url, shoe_uuid
-        )  # Ensure we always have first image for showing in collection
-        gif_process = Process(target=make_gif, args=(shoe_image_url, shoe_uuid))
+        status = download_first_image(shoe_image_url,shoe_uuid)
+        if status == "GIF":
+            def download_images_and_create_gif(shoe_url,uuid):
+                if get_images(shoe_image_url, shoe_uuid):
+                    make_gif(shoe_image_url, shoe_uuid)
+                    delete_images(shoe_uuid)
+                trim_image(os.path.join(IMAGE_PATH, shoe_uuid, "img", "01.png"))
+        gif_process = Process(target=download_images_and_create_gif, args=(shoe_image_url, shoe_uuid))
         gif_process.start()
     return {"status": "success", "message": "Shoe added to portfolio successfully!"}
 
