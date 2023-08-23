@@ -17,7 +17,7 @@ IMAGE_WIDTH = 800
 INDEX_LENGTH = 2
 WHITE_THRESHOLD = 230
 
-MAX_THREADS = 100
+MAX_THREADS = 5
 
 
 def get_visuals_all_items():
