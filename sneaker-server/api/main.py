@@ -9,7 +9,7 @@ import threading
 
 import sqlite3
 from api.db_utils import execute_sql, table_empty
-from api.img_utils import download_not_available_images
+from api.img_utils import get_visuals_all_items
 import logging
 
 app = FastAPI()
@@ -52,7 +52,7 @@ async def startup_db():
     for file, table in zip(data_files, tables):
         if table_empty(table):
             execute_sql(file)
-    thread = threading.Thread(target=download_not_available_images)
+    thread = threading.Thread(target=get_visuals_all_items)
     thread.start()
     logging.info("done downloading/moved after downloading")
 

@@ -14,120 +14,89 @@ IMAGE_WIDTH = 800
 INDEX_LENGTH = 2
 WHITE_THRESHOLD = 230
 
-logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
-logger = logging.getLogger()
+MAX_THREADS = 10
 
 
-def convert_url_to_gif_url(image_url: str):
-    IMAGE_URL_INDEX = 4
-    url_key = (
-        image_url.split("/")[IMAGE_URL_INDEX]
-        .replace("-Product.jpg", "")
-        .replace("-Product_V2.jpg", "")
-    )
-    return f"https://images.stockx.com/360/{url_key }/Images/{url_key}/Lv2/img01.jpg?w={IMAGE_WIDTH}"
-
-
-def download_first_image(old_image_url, shoe_uuid):
-    image_url = convert_url_to_gif_url(old_image_url)
-    if not image_url:
-        logger.error("No link provided.")
-        return
-    img_folder_path = os.path.join(IMAGE_PATH, shoe_uuid, "img")
-    os.makedirs(img_folder_path, exist_ok=True)
-    image_save_path = os.path.join(img_folder_path, "01.png")
-
-    if os.path.exists(image_save_path):
-        logger.info(f"First image already exists. Skipping download.")
-        return
-
-    response = requests.get(image_url, stream=True)
-
-    if response.status_code == 200:
-        with open(image_save_path, "wb") as file:
-            response.raw.decode_content = True
-            shutil.copyfileobj(response.raw, file)
-            logger.info(f"Successfully saved first image")
-    else:
-        logger.warning(
-            f"Failed to download first image from {image_url}, trying to download it from non 360 view instead."
-        )
-        image_url_split = old_image_url.split("?")
-        image_url = f"{image_url_split[0]}?w={IMAGE_WIDTH}"
-        disallow_transperency = "&bg=FFFFFF"
-        response = requests.get(f"{image_url}{disallow_transperency}", stream=True)
-
-        if response.status_code == 200:
-            with open(image_save_path, "wb") as file:
-                response.raw.decode_content = True
-                shutil.copyfileobj(response.raw, file)
-                logger.info(f"Successfully saved first image")
-        else:
-            logger.info(f"Failed to download first image from {image_url}")
-
-
-def get_rest_of_images(original_image_link, shoe_uuid):
-    if not original_image_link:
-        logger.error("No link provided.")
-        return
-
-    img_folder_path = os.path.join(IMAGE_PATH, shoe_uuid, "img")
-
-    os.makedirs(os.path.join(IMAGE_PATH, shoe_uuid), exist_ok=True)
-    logger.info(
-        f"Ensured shoe images folder under {os.path.join(IMAGE_PATH, shoe_uuid)}"
-    )
-
-    os.makedirs(img_folder_path, exist_ok=True)
-
-    link_template = original_image_link.rsplit("/", 1)[0]
-
-    for i in range(2, NUM_IMAGES + 1):
-        index = str(i).zfill(INDEX_LENGTH)
-        image_save_path = os.path.join(img_folder_path, f"{index}.png")
-
-        if os.path.exists(image_save_path):
-            logger.info(f"Image {index} already exists. Skipping download.")
-            continue
-
-        image_url = f"{link_template}/img{index}.jpg?w={IMAGE_WIDTH}"
-
-        response = requests.get(image_url, stream=True)
-
-        if response.status_code == 200:
-            with open(image_save_path, "wb") as file:
-                response.raw.decode_content = True
-                shutil.copyfileobj(response.raw, file)
-                logger.info(f"Successfully saved image {index} with url {image_url}")
-
-        else:
-            logger.warning(
-                f"Failed to download image {index} from {image_url}, won't try for more images anymore."
+def get_visuals_all_items():
+    with sqlite3.connect(DATABASE_PATH) as conn:
+        images_to_download = (
+            conn.cursor()
+            .execute(
+                """
+                SELECT portfolios.shoe_uuid, shoes.imageUrl 
+                FROM portfolios 
+                JOIN shoes ON portfolios.shoe_uuid = shoes.uuid
+                """
             )
-            break
+            .fetchall()
+        )
+
+    with ThreadPoolExecutor(max_workers=MAX_THREADS) as executor:
+        executor.map(get_visual_item, images_to_download)
+
+    logging.info("Finished downloading")
+
+def get_visual_item(item_data):
+    item_uuid, item_img_url = item_data
+    download_first_img(item_uuid, item_img_url, redownload=False)
+    download_360_images(item_uuid, item_img_url, redownload=False)
+    make_gif(item_uuid)
+    delete_images(item_uuid)
+    
+def download_first_img(item_uuid, img_url, redownload=True):
+    img_folder_path = os.path.join(IMAGE_PATH, item_uuid, "img")
+    os.makedirs(img_folder_path, exist_ok=True)
+    
+    first_img_path = os.path.join(img_folder_path, f"{item_uuid}.png")
+
+    if not redownload and os.path.exists(first_img_path):
+        return True
+    
+    img_360_url = _convert_url_to_360_url(img_url, "01")
+    
+    if _download_picture(img_360_url, first_img_path):
+        _trim_image(first_img_path)
+        return True
+    
+    img_standard_url = f"{img_url.split('?')[0]}?w={IMAGE_WIDTH}"
+    disallow_transparency = "&bg=FFFFFF"
+    
+    if _download_picture(f"{img_standard_url}{disallow_transparency}", first_img_path):
+        _trim_image(first_img_path)
+        return True
+    return False
 
 
-def make_gif(image_url: str, uuid: str):
-    image_url = convert_url_to_gif_url(image_url)
-    logger.info(f"Downloading images for {uuid}.")
-    get_rest_of_images(image_url, uuid)
-    logger.info(f"Successfully downloaded images for {uuid}.")
+def download_360_images(item_uuid, img_url, redownload=True):
+    img_folder_path = os.path.join(IMAGE_PATH, item_uuid, "img")
+    os.makedirs(img_folder_path, exist_ok=True)
+    
+    for i in range(1, NUM_IMAGES + 1):
+        index = str(i).zfill(INDEX_LENGTH)
+        img_save_path = os.path.join(img_folder_path, f"{index}.png")
+
+        if not redownload and os.path.exists(img_save_path):
+            logging.info(f"Image {index} already exists. Skipping download.")
+            return False
+        
+        img_url = _convert_url_to_360_url(img_url)
+        if _download_picture(img_url, img_save_path):
+            continue
+        return False
+
+
+def make_gif(uuid: str):
     gif_folder_path = os.path.join(IMAGE_PATH, uuid, "gif")
     img_folder_path = os.path.join(IMAGE_PATH, uuid, "img")
-    if not os.path.exists(gif_folder_path):
-        join_images(uuid, img_folder_path, gif_folder_path)
+    if os.path.exists(gif_folder_path):
+        return False
+    
+    logging.info(f"Creating gif for {uuid}.")
+    frames = [
+        Image.open(f"{img_folder_path}/{str(i).zfill(INDEX_LENGTH)}.png")
+        for i in range(1, NUM_IMAGES + 1)
+    ]
 
-
-def join_images(uuid, img_folder_path, gif_folder_path):
-    logger.info(f"Creating gif for {uuid}.")
-    try:
-        frames = [
-            Image.open(f"{img_folder_path}/{str(i).zfill(INDEX_LENGTH)}.png")
-            for i in range(1, NUM_IMAGES + 1)
-        ]
-    except OSError:
-        logger.info(f"gif not available, saving static image of shoe instead.")
-        frames = [Image.open(f"{img_folder_path}/01.png")]
     os.mkdir(gif_folder_path)
     gif_path = os.path.join(gif_folder_path, f"{uuid}.gif")
     frames[0].save(
@@ -138,26 +107,50 @@ def join_images(uuid, img_folder_path, gif_folder_path):
         duration=100,
         loop=0,
     )
-    logger.info(f"Successfully created gif for {uuid}.")
-    delete_images(frames, uuid)
-    logger.info(f"Successfully deleted unneccessary pictures for {uuid}.")
+    logging.info(f"Created gif for {uuid}.")
+    return True
 
 
-def delete_images(frames, uuid):
-    for i, frame in enumerate(frames):
-        if i == 0:
-            trim_image(frame.filename)
-            logger.info(f"Cut image under file path {frame.filename}")
-        else:
-            logger.info(f"Removed image {str(i).zfill(INDEX_LENGTH)} for {uuid}")
-            os.remove(frame.filename)
+def delete_images(uuid):
+    item_folder_path = os.path.join(IMAGE_PATH, uuid, "img")
+    for i, file in enumerate(os.listdir(item_folder_path, start=1)):
+        logging.info(f"Removed image {str(i).zfill(INDEX_LENGTH)} for {uuid}")
+        remove_path = os.path.join(IMAGE_PATH, uuid, "img", file)
+        os.remove(remove_path)
+            
+            
+def _download_picture(img_url, save_path):
+    response = requests.get(img_url, stream=True)
+    if response.status_code == 200:
+        with open(save_path, "wb") as file:
+            response.raw.decode_content = True
+            shutil.copyfileobj(response.raw, file)
+            logging.info(f"Successfully saved {img_url} to {save_path}")
+        return True
+    return False
+    
+
+def _convert_url_to_360_url(image_url: str, index):
+    IMAGE_URL_INDEX = 4
+    url_key_360 = (
+        image_url.split("/")[IMAGE_URL_INDEX]
+        .replace("-Product.png", "")
+        .replace("-Product.jpg", "")
+        .replace("-Product_V2.jpg", "")
+        .replace("-Product_V2.png", "")
+        .replace("_V2", "")
+        .replace(".png", "")
+        .replace(".jpg", "")
+    )
+
+    return f"https://images.stockx.com/360/{url_key_360}/Images/{url_key_360}/Lv2/img{index}.jpg?w={IMAGE_WIDTH}"
 
 
-def is_row_white(row, threshold=WHITE_THRESHOLD):
+def _is_row_white(row, threshold=WHITE_THRESHOLD):
     return all(pixel >= threshold for pixel in row) or all(pixel == 0 for pixel in row)
 
 
-def trim_image(path):
+def _trim_image(path):
     image = Image.open(path)
     grey_image = image.convert("L")
     data = list(grey_image.getdata())
@@ -166,14 +159,14 @@ def trim_image(path):
 
     top_crop = 0
     for row in pixels:
-        if is_row_white(row):
+        if _is_row_white(row):
             top_crop += 1
         else:
             break
 
     bottom_crop = 0
     for row in reversed(pixels):
-        if is_row_white(row):
+        if _is_row_white(row):
             bottom_crop += 1
         else:
             break
@@ -182,34 +175,6 @@ def trim_image(path):
     cropped_image.save(path)
 
 
-MAX_THREADS = 10
 
 
-def download_not_available_images():
-    with sqlite3.connect(DATABASE_PATH) as conn:
-        images_to_download = (
-            conn.cursor()
-            .execute(
-                """
-            SELECT portfolios.shoe_uuid, shoes.imageUrl 
-            FROM portfolios 
-            JOIN shoes ON portfolios.shoe_uuid = shoes.uuid
-            """
-            )
-            .fetchall()
-        )
 
-        def process_shoe(shoe_data):
-            shoe_uuid, shoe_image_url = shoe_data
-            if os.path.exists(os.path.join(IMAGE_PATH, shoe_uuid)):
-                logger.info(
-                    f"Images for shoe {shoe_uuid} already downloaded. Skipping."
-                )
-                return
-            download_first_image(shoe_image_url, shoe_uuid)
-            make_gif(shoe_image_url, shoe_uuid)
-
-        with ThreadPoolExecutor(max_workers=MAX_THREADS) as executor:
-            executor.map(process_shoe, images_to_download)
-
-    logging.info("Finished downloading")
