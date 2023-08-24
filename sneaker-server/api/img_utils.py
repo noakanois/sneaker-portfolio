@@ -193,7 +193,6 @@ def trim_image(path):
 
     cropped_image = image.crop((0, top_crop, width, height - bottom_crop))
     cropped_image.save(path)
-    logger.info(f"Successfully cropped first image in {path}.")
 
 
 if __name__ == "__main__":
