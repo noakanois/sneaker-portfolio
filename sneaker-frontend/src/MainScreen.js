@@ -17,6 +17,8 @@ function MainScreen() {
     const [selectedShoe, setSelectedShoe] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [searchResults, setSearchResults] = useState([]);
+    const [isFavoriteOverlayActive, setIsFavoriteOverlayActive] = useState(false);
+    const [isRotateOn, setIsRotateOn] = useState(false);
     const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
     const [isSizeModalOpen, setIsSizeModalOpen] = useState(false);
 
@@ -154,7 +156,15 @@ function MainScreen() {
             setPortfolio(updatedPortfolio);
                 };
             
-                
+        const isFavorite = ({uuid}) => {
+            const index = getPortfolioIndex({uuid});
+            if (portfolio[index]["favorite"]) {
+                return true;
+            } else {
+                return false;
+            }
+          
+        }
         return (
             <div
                 key={shoe.uuid}
@@ -169,7 +179,7 @@ function MainScreen() {
                         currentTarget.src = shoe.imageUrl;
                     }}></img>
                     <img className="gif" src={URL + "images/" + shoe.uuid + "/gif/" + shoe.uuid + ".gif"} onError={({ currentTarget }) => {
-                        currentTarget.onerror = null;
+                        currentTarget.onerror = null;   
                         currentTarget.src = shoe.imageUrl;
                     }}></img>
                     
@@ -177,6 +187,19 @@ function MainScreen() {
                 <div className="favourite-heart"> 
                     <Heart isClick={portfolio[getPortfolioIndex({uuid: shoe.uuid })]["favorite"]} onClick={(event) => {toggleFavoriteStatus({uuid: shoe.uuid }); event.stopPropagation()}} />
                     </div>
+                    {isFavoriteOverlayActive && !isFavorite({uuid: shoe.uuid}) ? (
+                                        <div className="translucent-overlay">
+                                        
+                                        </div> 
+                                        ): null
+                    }  
+                    {
+                    isFavoriteOverlayActive && isFavorite({uuid: shoe.uuid}) ? (
+                        <div className="favorite-gif-active">
+                        
+                        </div> 
+                        ): null
+                    }
                 <div className="shoe-info">
                     <h4>{shoe.title}</h4>
                 </div>
@@ -207,8 +230,22 @@ function MainScreen() {
         });
         return (
             <div className="main-grid">
+               {isRotateOn &&  (
+                        <div className="rotate-active">
+                        
+                        </div> 
+                        )
+                    }
+
+                {isFavoriteOverlayActive &&  (
+                        <div className="favorite-active">
+                        
+                        </div> 
+                        )
+                    }
                 <div ref={dropRef} className="shoe-grid">
-                    {React.Children.map(children, child => child)}
+                    {React.Children.map(children, child => child)
+                    }
                 </div>
             </div>
         );
@@ -230,6 +267,14 @@ function MainScreen() {
         const randomShoe = portfolio[randomIndex];
         setSelectedShoe(randomShoe);
         setIsModalOpen(true);
+     }
+
+     const toggleFavoriteState = () =>{
+        setIsFavoriteOverlayActive(!isFavoriteOverlayActive);
+     }
+
+     const toggleRotateState = () =>{
+        setIsRotateOn(!isRotateOn);
      }
 
      const Navbar = ({ users, handleUserClick, selectedUserId, selectedUser }) => (
@@ -258,6 +303,8 @@ function MainScreen() {
             <div className="action-buttons">
                 <button className="action-button add" onClick={() => setIsSearchModalOpen(true)}>+</button>
                 <button className="action-button random" onClick={getRandomShoe}>🎲 </button>
+                <button className="action-button favorite" onClick={toggleFavoriteState}>❤️</button>
+                <button className="action-button rotate" onClick={toggleRotateState}>🌀</button>
             </div>
         </div>
     );
@@ -306,7 +353,9 @@ function MainScreen() {
                             </div>
 
                             <div className="shoe-grid">
+                                
                                 {searchResults.map(shoe => (
+                                
                                     <div key={shoe.uuid} className="shoe-card" onClick={() => showSizeModal(shoe)}>
                                         <div className="image-container">
                                             <img src={shoe.thumbUrl} alt={shoe.title} />
