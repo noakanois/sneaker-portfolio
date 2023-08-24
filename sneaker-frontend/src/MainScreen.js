@@ -18,6 +18,7 @@ function MainScreen() {
     const [searchTerm, setSearchTerm] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [isFavoriteOverlayActive, setIsFavoriteOverlayActive] = useState(false);
+    const [isRotateOn, setIsRotateOn] = useState(false);
     const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
     const [isSizeModalOpen, setIsSizeModalOpen] = useState(false);
 
@@ -229,7 +230,19 @@ function MainScreen() {
         });
         return (
             <div className="main-grid">
-               
+               {isRotateOn &&  (
+                        <div className="rotate-active">
+                        
+                        </div> 
+                        )
+                    }
+
+                {isFavoriteOverlayActive &&  (
+                        <div className="favorite-active">
+                        
+                        </div> 
+                        )
+                    }
                 <div ref={dropRef} className="shoe-grid">
                     {React.Children.map(children, child => child)
                     }
@@ -256,8 +269,12 @@ function MainScreen() {
         setIsModalOpen(true);
      }
 
-     const changeFavoriteState = () =>{
+     const toggleFavoriteState = () =>{
         setIsFavoriteOverlayActive(!isFavoriteOverlayActive);
+     }
+
+     const toggleRotateState = () =>{
+        setIsRotateOn(!isRotateOn);
      }
 
      const Navbar = ({ users, handleUserClick, selectedUserId, selectedUser }) => (
@@ -286,8 +303,8 @@ function MainScreen() {
             <div className="action-buttons">
                 <button className="action-button add" onClick={() => setIsSearchModalOpen(true)}>+</button>
                 <button className="action-button random" onClick={getRandomShoe}>🎲 </button>
-                <button className="action-button favorite" onClick={changeFavoriteState}>❤️</button>
-                
+                <button className="action-button favorite" onClick={toggleFavoriteState}>❤️</button>
+                <button className="action-button rotate" onClick={toggleRotateState}>🌀</button>
             </div>
         </div>
     );

@@ -295,33 +295,93 @@
   margin-top: -10px; 
 }
 
-.main-grid  .shoe-card:not(:has(.favorite-gif-active)) img.gif {
+.main-grid:not(:has(.rotate-active))  .shoe-card img.gif {
   display: none;  
 }
 
-.main-grid .shoe-card:not(:has(.favorite-gif-active)):hover img.gif {
+.main-grid:not(:has(.favorite-active)):not(:has(.rotate-active)) .shoe-card:hover img.gif {
   display: block;  
 }
 
-.main-grid .shoe-card:not(:has(.favorite-gif-active)):hover img:not(.gif) {
-  display: none; 
+.main-grid:has(.favorite-active) .shoe-card:has(.favorite-gif-active):hover img.gif {
+  display: block;  
 }
-
-.main-grid  .shoe-card:has(.favorite-gif-active) img:not(.gif) {
+.main-grid:has(.favorite-active) .shoe-card:has(.favorite-gif-active):hover img:not(.gif) {
   display: none;  
 }
 
 
+
+
+.main-grid:not(:has(.favorite-active))  .shoe-card:hover img:not(.gif) {
+  display: none; 
+}
+
+.main-grid:has(.rotate-active)  .shoe-card img.gif {
+  display: block;  
+}
+
+.main-grid:has(.rotate-active)  .shoe-card img:not(.gif)  {
+  display: none;  
+}
+
+
+
+.main-grid:has(.rotate-active)  .shoe-card:has(.favorite-gif-active) img.gif {
+  display: block;  
+}
+
+.main-grid:has(.rotate-active)  .shoe-card:has(.favorite-gif-active) img:not(.gif) {
+  display: none;  
+}
+
+.main-grid:has(.favorite-active):has(.rotate-active)  .shoe-card:has(.favorite-gif-active) .shoe-info {
+  opacity: 1;
+}
+
+.main-grid:has(.favorite-active) .shoe-card:not(:has(.favorite-gif-active)) .shoe-info {
+  opacity: 0;
+}
+
+
+
+.main-grid:has(.rotate-active)  .shoe-card:not(:has(.favorite-gif-active)) img:not(.gif) {
+  display: block;  
+}
+
+.main-grid:has(.rotate-active)  .shoe-card:not(:has(.favorite-gif-active)) img.gif {
+  display: none;  
+}
+
+
+
+.main-grid:has(.rotate-active):not(:has(.favorite-active))  .shoe-card img.gif {
+  display: block;  
+}
+
+.main-grid:has(.rotate-active):not(:has(.favorite-active))  .shoe-card img:not(.gif) {
+  display: none;  
+}
+
+.main-grid:has(.rotate-active):not(:has(.favorite-active))   .shoe-card .shoe-info {
+  opacity: 1;
+}
+
+
+.shoe-card:has(.translucent-overlay) {
+  filter: grayscale(100%);
+}
 
 .translucent-overlay {
   position: absolute;
 
   left:0;
   right: 0;
-  top:15px;
-  bottom: 0;
+  top: 25px;
+  padding-bottom:50px;
+  bottom: -25px;
   z-index: 10;
- 
+  
   background: rgba(255,255 , 255, 0.8);
 }
 
@@ -427,6 +487,11 @@
 }
 
 .action-button.favorite {
+  background-color:var(--primary-color); 
+  color: white;
+}
+
+.action-button.rotate {
   background-color:var(--primary-color); 
   color: white;
 }
