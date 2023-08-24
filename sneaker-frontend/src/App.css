@@ -4,7 +4,6 @@
   text-align: center;
   background-color: var(--background-color);
   position: relative;
-  font-family: "Century Gothic";
 }
 
 .App-logo {
@@ -408,8 +407,6 @@
 .action-button:hover {
   opacity: 0.9;
 }
-
-
 
 @media only screen and (max-width: 767px) {
   .shoe-grid {
