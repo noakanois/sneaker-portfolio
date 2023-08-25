@@ -19,7 +19,7 @@ function MainScreen() {
     const [searchResults, setSearchResults] = useState([]);
     const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
     const [isSizeModalOpen, setIsSizeModalOpen] = useState(false);
-
+    const [greyOutNonFav, setGreyOutNonFav] = useState(false);
     axios.defaults.headers['ngrok-skip-browser-warning'] = 'true';
 
     const showSizeModal = (shoe) => {
@@ -113,8 +113,8 @@ function MainScreen() {
     }
 
     
-
-    const DraggableShoeCard = ({ user, shoe, index, moveShoe }) => {
+    
+    const DraggableShoeCard = ({ user, shoe, index, moveShoe, greyOutNonFav}) => {
         const [{ isDragging }, dragRef] = useDrag({
             type: 'SHOE',
             item: { index },
@@ -158,7 +158,7 @@ function MainScreen() {
         return (
             <div
                 key={shoe.uuid}
-                className="shoe-card"
+                className={`shoe-card ${greyOutNonFav && !shoe.favorite ? 'greyed-out' : ''}`}
                 onClick={() => handleShoeClick(shoe)}
                 ref={ref}
                 style={isDragging ? { opacity: 0.5 } : {}}
@@ -258,6 +258,7 @@ function MainScreen() {
             <div className="action-buttons">
                 <button className="action-button add" onClick={() => setIsSearchModalOpen(true)}>+</button>
                 <button className="action-button random" onClick={getRandomShoe}>🎲 </button>
+                <button className="action-button favorite" onClick={() => setGreyOutNonFav(!greyOutNonFav)}>❤️</button>
             </div>
         </div>
     );
@@ -273,7 +274,7 @@ function MainScreen() {
                 users={users} 
                 handleUserClick={handleUserClick} 
                 selectedUser={selectedUser} 
-            />
+            />   
 
 
                 {isSearchModalOpen && (
@@ -354,7 +355,7 @@ function MainScreen() {
 
                             <DroppablePortfolio onDrop={handleDrop}>
                                 {portfolio.map((shoe, idx) => (
-                                    <DraggableShoeCard shoe={shoe} key={shoe.uuid} index={idx} moveShoe={moveShoe} />
+                                    <DraggableShoeCard shoe={shoe} key={shoe.uuid} index={idx} moveShoe={moveShoe} greyOutNonFav={greyOutNonFav}/>
                                 ))}
                             </DroppablePortfolio>
                         </>
