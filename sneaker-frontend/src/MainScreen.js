@@ -228,6 +228,10 @@ function MainScreen() {
                 favoriteShoes.push(shoe);
             }
         }
+        if (favoriteShoes.length === 0) {
+            alert('No favorited items in the portfolio to select from!');
+            return;
+         }
         const randomIndex = Math.floor(Math.random() * favoriteShoes.length);
         const randomShoe = favoriteShoes[randomIndex];
         setSelectedShoe(randomShoe);
