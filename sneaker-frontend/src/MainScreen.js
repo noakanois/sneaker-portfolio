@@ -242,17 +242,20 @@ function MainScreen() {
 
 
     const getRandomShoe = () => {
-
+        let shoes;    
         if (greyOutNonFav) {
-            getRandomFavoriteShoe();
-            return;
+            shoes = portfolio.filter(shoe => shoe.favorite);
+           
+        } else {
+            shoes = portfolio;
         }
         if (portfolio.length === 0) {
            alert('No items in the portfolio to select from!');
            return;
         }
-        const randomIndex = Math.floor(Math.random() * portfolio.length);
-        const randomShoe = portfolio[randomIndex];
+        
+        const randomIndex = Math.floor(Math.random() * shoes.length);
+        const randomShoe = shoes[randomIndex];
         setSelectedShoe(randomShoe);
         setIsModalOpen(true);
      }
