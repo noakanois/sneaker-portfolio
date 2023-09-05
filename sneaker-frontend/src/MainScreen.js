@@ -221,34 +221,10 @@ function MainScreen() {
         setPortfolio(updatedPortfolio);
     };
 
-    const getRandomFavoriteShoe = () => {
-        const favoriteShoes = [];
-        for (const shoe of portfolio) {
-            if (shoe["favorite"]) {
-                favoriteShoes.push(shoe);
-            }
-        }
-        if (favoriteShoes.length === 0) {
-            alert('No favorited items in the portfolio to select from!');
-            return;
-         }
-        const randomIndex = Math.floor(Math.random() * favoriteShoes.length);
-        const randomShoe = favoriteShoes[randomIndex];
-        setSelectedShoe(randomShoe);
-        setIsModalOpen(true);
-
-    }
-
-
 
     const getRandomShoe = () => {
-        let shoes;    
-        if (greyOutNonFav) {
-            shoes = portfolio.filter(shoe => shoe.favorite);
-           
-        } else {
-            shoes = portfolio;
-        }
+        let shoes = greyOutNonFav ? portfolio.filter(shoe => shoe.favorite) : portfolio;
+        
         if (portfolio.length === 0) {
            alert('No items in the portfolio to select from!');
            return;
