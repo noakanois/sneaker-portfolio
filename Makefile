@@ -1,4 +1,4 @@
-.PHONY: all portfolio server frontend
+.PHONY: server frontend
 
 server:
 	cd sneaker-server && poetry run uvicorn api.main:app
