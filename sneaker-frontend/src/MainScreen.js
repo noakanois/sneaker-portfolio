@@ -221,13 +221,17 @@ function MainScreen() {
         setPortfolio(updatedPortfolio);
     };
 
+
     const getRandomShoe = () => {
+        let shoes = greyOutNonFav ? portfolio.filter(shoe => shoe.favorite) : portfolio;
+        
         if (portfolio.length === 0) {
            alert('No items in the portfolio to select from!');
            return;
         }
-        const randomIndex = Math.floor(Math.random() * portfolio.length);
-        const randomShoe = portfolio[randomIndex];
+        
+        const randomIndex = Math.floor(Math.random() * shoes.length);
+        const randomShoe = shoes[randomIndex];
         setSelectedShoe(randomShoe);
         setIsModalOpen(true);
      }
