@@ -9,11 +9,3 @@ build:
 
 frontend:
 	cd sneaker-frontend && npm start
-
-stop-server:
-	pkill -f 'uvicorn api.main:app'
-
-stop-frontend:
-	pkill -f 'npm start'
-
-stop: stop-server stop-frontend
