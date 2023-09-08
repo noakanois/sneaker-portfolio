@@ -19,9 +19,12 @@ app.include_router(router_search)
 app.include_router(router_user)
 app.include_router(router_favorite)
 
-app.mount(
-    "/static", StaticFiles(directory="../sneaker-frontend/build/static"), name="static"
-)
+try:
+    app.mount(
+        "/static", StaticFiles(directory="../sneaker-frontend/build/static"), name="static"
+    )
+except:
+    logging.info("Not Serving Static Files")
 
 os.makedirs("./img_data", exist_ok=True)
 app.mount("/images", StaticFiles(directory="./img_data"), name="images")
