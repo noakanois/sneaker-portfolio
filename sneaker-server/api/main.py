@@ -24,7 +24,7 @@ try:
         "/static", StaticFiles(directory="../sneaker-frontend/build/static"), name="static"
     )
 except:
-    logging.info("Using live Server")
+    logging.info("Not Serving Static Files")
 
 os.makedirs("./img_data", exist_ok=True)
 app.mount("/images", StaticFiles(directory="./img_data"), name="images")
