@@ -6,7 +6,11 @@ import './App.css';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 
-const URL = 'http://localhost:8000/';
+const URL = process.env.REACT_APP_API_URL;
+
+if (!URL) {
+    alert("Please put a .env file in the react project folder with REACT_APP_API_URL defined like .env.template and restart the Server");
+}
 
 function MainScreen() {
     const [users, setUsers] = useState([]);
