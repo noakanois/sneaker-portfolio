@@ -225,7 +225,7 @@ function MainScreen() {
     const getRandomShoe = () => {
         let shoes = greyOutNonFav ? portfolio.filter(shoe => shoe.favorite) : portfolio;
         
-        if (portfolio.length === 0) {
+        if (shoes.length === 0) {
            alert('No items in the portfolio to select from!');
            return;
         }
