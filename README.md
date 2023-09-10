@@ -81,7 +81,8 @@
 - To configure the variable, add a `.env` file in `sneaker-frontend` similar to the `.env.template` found in the same folder 
 
 ### Requirements
-For the application to run on your device, you will need some things installed. The linked tutorials and commands are for Ubuntu Linux.
+For the application to run on your device, you will need some things installed. The linked tutorials and commands are written for an Ubuntu Linux distribution. To make the Python environment easier to setup, [conda](https://docs.conda.io/en/latest/) is recommended.
+
 - `Python 3.11` --> [Tutorial](https://iohk.zendesk.com/hc/en-us/articles/16724475448473-Install-Python-3-11-on-ubuntu)
 - `pip` --> `sudo apt install python3-pip`
 - `poetry` --> `pip install poetry`
