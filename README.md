@@ -72,7 +72,6 @@
 
 ## How to use?
 
-The application consists of a back- and frontend. For it to work, both of the services have to be running.
 
 **BEFORE YOU START THE APPLICATION:**
 
@@ -80,7 +79,13 @@ The application consists of a back- and frontend. For it to work, both of the se
 - The variable `REACT_APP_API_URL` has to be configured to the URL the application will be running on. If you run it on your local machine, it has to be configured to `http://localhost:8000/`.
 - To configure the variable, add a `.env` file in `sneaker-frontend` similar to the `.env.template` found in the same folder 
 
-
+### Requirements
+For the application to run on your device, you will need some things installed. The linked tutorials and commands are for Ubuntu Linux.
+- `Python 3.11` --> [Tutorial](https://iohk.zendesk.com/hc/en-us/articles/16724475448473-Install-Python-3-11-on-ubuntu)
+- `pip` --> `sudo apt install python3-pip`
+- `poetry` --> `pip install poetry`
+- `nodejs` --> `sudo apt install nodejs`
+- `npm` -->  `sudo apt install npm`
 ### Backend
 
 - `make install-server` to install dependencies
