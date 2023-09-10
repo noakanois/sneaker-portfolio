@@ -9,6 +9,7 @@
 
 - [Feature Showcase](#feature-showcase)
 - [How to use?](#how-to-use)
+  - [Requirements](#requirements) 
   - [Backend](#backend)
   - [Frontend](#frontend)
   - [Docker 🐳](#docker-)
