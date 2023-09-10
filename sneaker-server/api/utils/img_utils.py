@@ -10,7 +10,7 @@ from PIL import Image
 
 logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
-DATABASE_PATH = "test.db"
+DATABASE_PATH = "shoes.db"
 IMAGE_PATH = os.path.join(".", "img_data")
 NUM_IMAGES = 36
 IMAGE_WIDTH = 800
