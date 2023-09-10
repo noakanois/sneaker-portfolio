@@ -39,7 +39,7 @@ async def add_to_portfolio(data: PortfolioData):
             (data.userId, shoe_uuid),
         )
         conn.commit()
-        gif_process = Process(target=get_visual_item, args=(shoe_image_url, shoe_uuid))
+        gif_process = Process(target=get_visual_item, args=((shoe_uuid, shoe_image_url),))
         gif_process.start()
     return {"status": "success", "message": "Shoe added to portfolio successfully!"}
 
