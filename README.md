@@ -1,20 +1,20 @@
 # Sneaker Portfolio  
-![a](readme-media/gifs/portfolio.gif)
+<img src = readme-media/gifs/portfolio.gif > </img>
 
 
   
 
-
-# [Check out the Website here!](https://nsli.me)#
+# [Check out the Website here!](https://nsli.me)
 
 - [Sneaker Portfolio](#sneaker-portfolio)
-- [Check out the Website here!#](#check-out-the-website-here)
+- [Check out the Website here!](#check-out-the-website-here)
   - [Features](#features)
   - [How to use?](#how-to-use)
     - [Backend](#backend)
     - [Frontend](#frontend)
     - [Docker 🐳](#docker-)
   - [Future features](#future-features)
+
 
 ## Features
 
