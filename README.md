@@ -1,9 +1,14 @@
-# Sneaker Portfolio  [Website](https://nsli.me)
-![a](readme-media/imgs/portfolio.png)
+# Sneaker Portfolio  
+![a](readme-media/gifs/portfolio.gif)
 
 
   
-- [Sneaker Portfolio  Website](#sneaker-portfolio--website)
+
+
+# [Check out the Website here!](https://nsli.me)#
+
+- [Sneaker Portfolio](#sneaker-portfolio)
+- [Check out the Website here!#](#check-out-the-website-here)
   - [Features](#features)
   - [How to use?](#how-to-use)
     - [Backend](#backend)
@@ -11,16 +16,9 @@
     - [Docker 🐳](#docker-)
   - [Future features](#future-features)
 
-
 ## Features
 
 <font size ="5">
-<details>
-    <summary> Visual Portfolio</summary>
-    <br> 
-    <img src = readme-media/gifs/interface.gif > </img>
-</details>
-
 
 <details>
     <summary> 360 Degree Animations</summary>
