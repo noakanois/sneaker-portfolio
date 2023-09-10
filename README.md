@@ -11,43 +11,67 @@
 
 
 # Sneaker Portfolio  [Website](nsli.me)
+![a](readme_media/imgs/portfolio.png)
 
 ## Features
 
-
-### Track your collection
-
-Track your shoe collection and order it in any way you want using drag & drop. On hover, a 360 degree animation of each shoe is displayed.
+<font size ="5">
 <details>
-<summary>GIF</summary>
-<br> 
-<img src = gifs/interface.gif > </img>
-![test](gifs/interface.gif)
-
+    <summary> Visual Portfolio</summary>
+    <br> 
+    <img src = readme_media/gifs/interface.gif > </img>
 </details>
 
-### Get information about any shoe
 
-If you click on any shoe in your portfolion, you can look at further information, such as a small description and a link to StockX.
+<details>
+    <summary> 360 Degree Animations</summary>
+    <br> 
+    <img src = readme_media/gifs/360.gif > </img>
+</details>
 
-![a](gifs/information.gif)
+<details>
+    <summary>Drag & Drop </summary>
+    <br> 
+    <img src = readme_media/gifs/draganddrop.gif > </img>
+</details>
 
-### Search for and add shoes
-With the Add button, you can search for any shoe. After finding the right one, you can add it to your portfolio. 
+<details>
+    <summary>Get Shoe Information & Links</summary>
+    <br> 
+    <img src = readme_media/gifs/information.gif > </img>
+</details>
 
-![b](gifs/addshoe.gif)
+<details>
+    <summary>Add Shoes</summary>
+    <br> 
+    <img src = readme_media/gifs/add.gif > </img>
+</details>
 
 
-### Get a random shoe from your collection
+<details>
+    <summary>Remove Shoes</summary>
+    <br> 
+    <img src = readme_media/gifs/remove.gif > </img>
+</details>
 
-If you are ever unsure what shoe to wear, you can simply use the 🎲 button and let the portfolio pick a random shoe from your collection.
+<details>
+    <summary>Get Random Shoe 🎲</summary>
+    <br> 
+    <img src = readme_media/gifs/random.gif > </img>
+</details>
 
-![b](gifs/randomshoe.gif)
+<details>
+    <summary>Favorite View ❤️</summary>
+    <br> 
+    <img src = readme_media/gifs/favorite.gif > </img>
+</details>
 
 
-### Favourite your shoes
 
-When hovering over a shoe and clicking on the ❤️, you can favourite or un-favourite any shoe in your portfolio. After clicking on the ❤️ button, only the favourited shoes will be presented, while the other ones will be greyed out. If the 🎲 button is pressed in this mode, you will only get random suggestions from your favourite shoes.
 
-![b](gifs/favoriteshoe.gif)
+
+</font> 
+
+
+
 
