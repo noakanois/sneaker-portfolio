@@ -72,12 +72,13 @@
 
 ## How to use?
 
-The portfolio consists of a FastAPI Backend and a Frontend written in React. For the application to be working, both of the services have to be running. 
+The application consists of a back- and frontend. For it to work, both of the services have to be running.
 
 **BEFORE YOU START THE APPLICATION:**
 
-- Add a `.env` file in `/sneaker-frontend` similar to the `.env.template` found in the same folder. 
-- The variable `REACT_APP_API_URL` should be configured the URL the application is running on. If you are running it on your local machine, use `http://localhost:8000/` as the value.
+
+- The variable `REACT_APP_API_URL` has to be configured to the URL the application will be running on. If you run it on your local machine, it has to be configured to `http://localhost:8000/`.
+- To configure the variable, add a `.env` file in `sneaker-frontend` similar to the `.env.template` found in the same folder 
 
 
 ### Backend
