@@ -1,6 +1,6 @@
 .PHONY: server frontend
 
-server-install:
+install-server:
 	cd sneaker-server && poetry install
 
 server:
