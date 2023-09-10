@@ -1,6 +1,15 @@
-
 # Sneaker Portfolio  [Website](https://nsli.me)
 ![a](readme-media/imgs/portfolio.png)
+
+
+  
+- [Sneaker Portfolio  Website](#sneaker-portfolio--website)
+  - [Features](#features)
+  - [How to Use](#how-to-use)
+    - [Backend](#backend)
+    - [Frontend](#frontend)
+    - [Docker 🐳](#docker-)
+
 
 ## Features
 
