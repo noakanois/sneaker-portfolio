@@ -1,5 +1,8 @@
 .PHONY: server frontend
 
+install-server:
+	cd sneaker-server && poetry install
+
 server:
 	cd sneaker-server && poetry run uvicorn api.main:app
 
