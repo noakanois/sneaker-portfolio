@@ -18,8 +18,13 @@
 ### Track your collection
 
 Track your shoe collection and order it in any way you want using drag & drop. On hover, a 360 degree animation of each shoe is displayed.
-
+<details>
+<summary>GIF</summary>
+<br> 
+<img src = gifs/interface.gif > </img>
 ![test](gifs/interface.gif)
+
+</details>
 
 ### Get information about any shoe
 
