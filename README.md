@@ -108,5 +108,6 @@ For the application to run on your device, you will need some things installed. 
 
 ## Future features
 
-- Allow addition of users
+- Creation of new users via the Frotnend. Currently, there is a fix amount of users added by hand to the database.
+- Insertion of custom entries, in case StockX does not have a shoe available.
 - ...
