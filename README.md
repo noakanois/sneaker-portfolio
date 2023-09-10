@@ -7,7 +7,7 @@
 <img src = readme-media/gifs/portfolio.gif > </img>
 ## Table of Contents
 
-- [Features](#features)
+- [Feature Showcase](#feature-showcase)
 - [How to use?](#how-to-use)
   - [Backend](#backend)
   - [Frontend](#frontend)
@@ -16,7 +16,7 @@
 - [Future features](#future-features)
 
 
-## Features 
+## Feature Showcase
 
 
 
