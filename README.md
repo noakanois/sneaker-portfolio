@@ -6,6 +6,7 @@
 
 # [Check out the Website here!](https://nsli.me)
 
+
 - [Sneaker Portfolio](#sneaker-portfolio)
 - [Check out the Website here!](#check-out-the-website-here)
   - [Features](#features)
@@ -16,10 +17,12 @@
   - [Future features](#future-features)
 
 
-## Features
+## Features 
 
-<font size ="5">
 
+
+
+*[CLICK TO EXPAND]*
 <details>
     <summary> 360 Degree Animations</summary>
     <br> 
@@ -66,7 +69,6 @@
 
 
 
-</font> 
 
 
 ## How to use?
