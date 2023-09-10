@@ -112,7 +112,7 @@ function MainScreen() {
 
 
 
-    const DraggableShoeCard = ({ user, shoe, index, moveShoe, greyOutNonFav }) => {
+    const DraggableShoeCard = ({shoe, index, moveShoe, greyOutNonFav }) => {
         const [{ isDragging }, dragRef] = useDrag({
             type: 'SHOE',
             item: { index },
