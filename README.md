@@ -90,14 +90,14 @@ For the application to run on your device, you will need some things installed. 
 - `npm` -->  `sudo apt install npm`
 ### Backend
 
-- `make install-server` to install dependencies
-- `make server` to start the server on port `8000`
+- `make install-server` to install dependencies.
+- `make server` to start the Python FastAPI backend server on default port `8000`.
 
 
 ### Frontend
 
-- `make build` to install dependencies and generate static webpages. The frontend will also be accessible through port `8000
-- `make frontend` for development of the website on port `3000`.
+- `make build` to install dependencies and generate static webpages with React. These webpages can then be served by the backend. 
+- `make frontend` starts a webserver serving the websites on default port `3000`.
 
 
 ### Docker 🐳
@@ -105,32 +105,6 @@ For the application to run on your device, you will need some things installed. 
 - The application can also be run through docker. Simply run `docker-compose up` to start both front- and backend.
 
 
-## API Endpoints
-
-- `/users`
-  
-       `GET`: Get a list of all users in the database.
-- `/user` 
-  - `/addToPortfolio`
-    
-        `POST; {userId: str, shoeTitle:str}`: Add a shoe with the title `shoeTitle` to the user with the id `userId`
-  
-   - `/{user_id}/portfolio`,
-    
-         `GET`: Get the portfolio onformation af the user with `user_id`
-  - `/{user_id}/portfolio/{shoe_uuid}`
- 
-        DELETE {user_id: int, shoe_uuid: str}: Remove the shoe with uuid `shoe_uuid` from the user `user_id`
-
-  - `/{user_id}/portfolio/reorder`
-        
-        POST {user_id: int, order_data: List[str] }: Reorder the portfolio of user with id `user_id` according to the `order_data`
-- `/search/name/{name}`
-        
-      `GET`: Get a list of the search results with the search term `name`
-- `/favorites/{user_id}/set/{shoe_uuid}/{status}`
-     
-      POST {user_id: int, shoe_uuid: str, status: bool}: Change the favorite status to `status` of the shoe with uuid `shoe_uuid` in the user with the id `user_id`
 
 ## Future features
 
