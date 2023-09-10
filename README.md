@@ -5,10 +5,11 @@
   
 - [Sneaker Portfolio  Website](#sneaker-portfolio--website)
   - [Features](#features)
-  - [How to Use](#how-to-use)
+  - [How to use?](#how-to-use)
     - [Backend](#backend)
     - [Frontend](#frontend)
     - [Docker 🐳](#docker-)
+  - [Future features](#future-features)
 
 
 ## Features
@@ -70,7 +71,7 @@
 </font> 
 
 
-## How to Use
+## How to use?
 
 The portfolio consists of a FastAPI Backend and a Frontend written in React. For the application to be working, both of the services have to be running. 
 
@@ -96,3 +97,7 @@ The portfolio consists of a FastAPI Backend and a Frontend written in React. For
 
 - The application can also be run through docker. Simply run `docker-compose up` to start both front- and backend.
 
+## Future features
+
+- Allow addition of users
+- ...
