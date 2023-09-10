@@ -1,21 +1,19 @@
-# Sneaker Portfolio  
+# Sneaker Portfolio  👟 
+
+
+
+# [Website](https://nsli.me) <-- Check it out
+
 <img src = readme-media/gifs/portfolio.gif > </img>
+## Table of Contents
 
-
-  
-
-# [Check out the Website here!](https://nsli.me)
-
-
-- [Sneaker Portfolio](#sneaker-portfolio)
-- [Check out the Website here!](#check-out-the-website-here)
-  - [Features](#features)
-  - [How to use?](#how-to-use)
-    - [Backend](#backend)
-    - [Frontend](#frontend)
-    - [Docker 🐳](#docker-)
-  - [API Endpoints](#api-endpoints)
-  - [Future features](#future-features)
+- [Features](#features)
+- [How to use?](#how-to-use)
+  - [Backend](#backend)
+  - [Frontend](#frontend)
+  - [Docker 🐳](#docker-)
+- [API Endpoints](#api-endpoints)
+- [Future features](#future-features)
 
 
 ## Features 
