@@ -1,6 +1,6 @@
 import sqlite3
 
-conn = sqlite3.connect("../../test.db")
+conn = sqlite3.connect("../../shoes.db")
 
 QUERY_ADD_GRID_ORDER = """
     ALTER TABLE portfolios ADD order_position INTEGER;
