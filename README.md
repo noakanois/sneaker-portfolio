@@ -90,7 +90,7 @@ Sneaker Portfolio is an interactive Website which allows you to track your shoe 
 
 - The variable `REACT_APP_API_URL` has to be configured to the URL the application will be running on. If you run it on your local machine, it has to be configured to `http://localhost:8000/`.
 - To configure the variable, add a `.env` file in `sneaker-frontend` similar to the `.env.template` found in the same folder 
-- 
+  
 ### Docker 🐳
 
 We heavily encourage running the application through Docker. Run `docker-compose up` to start it on default port `8000`.
