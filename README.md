@@ -1,12 +1,18 @@
-# Sneaker Portfolio  👟 
 
-
-
-### [Website](https://nsli.me) <-- Check it out
-
+<p align="center">
 <img src = readme-media/gifs/portfolio.gif > </img>
+</p>
+<h1 align="center"> Sneaker Portfolio   </h1>
 
+<font size=5px>
+<b align="center">
 
+<a href="https://nsli.me"> 👟 Check out the Website 👟</a>
+
+</b>
+</font >
+
+Sneaker Portfolio is an interactive Website which allows you to track your shoe collection in a visual portfolio. You can search, add, and remove shoes in order to keep it up to date. The portfolio can be presented in any order and includes features such as a random picker 🎲. Not only can you show off your collection easier to your friends, but you can also make yourself a better picture on what shoes you could buy next. 
 
 
 ## Table of Contents
