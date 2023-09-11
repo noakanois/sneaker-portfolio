@@ -1,7 +1,4 @@
-import os
-import pytest
-from PIL import Image
-from api.img_utils import convert_url_to_360_url, is_row_white, trim_image
+from api.img_utils import convert_url_to_360_url, is_row_white
 
 
 def test_convert_url_to_360_url():

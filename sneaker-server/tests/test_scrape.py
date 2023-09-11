@@ -1,4 +1,3 @@
-import os
 import pytest
 from unittest.mock import patch, MagicMock
 from api.scrape import get_search_json
@@ -6,10 +5,7 @@ from api.scrape import get_search_json
 
 @pytest.fixture
 def mock_response():
-    with open(
-        os.path.join(os.path.dirname(__file__), "mock_data/mock_search_response.json"),
-        "rb",
-    ) as f:
+    with open("tests/mock_data/mock_search_response.json","rb",) as f:
         response_content = f.read()
     response = MagicMock()
     response.content = response_content
