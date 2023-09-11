@@ -1,5 +1,8 @@
 .PHONY: server frontend
 
+test:
+	make test-server
+
 install-server:
 	cd sneaker-server && poetry install
 
