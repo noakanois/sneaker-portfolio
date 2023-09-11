@@ -1,5 +1,8 @@
 .PHONY: server frontend
 
+test:
+	make test-server
+
 install-server:
 	cd sneaker-server && poetry install
 
@@ -12,3 +15,6 @@ build:
 
 frontend:
 	cd sneaker-frontend && npm start
+
+test-server:
+	cd sneaker-server && poetry run pytest
