@@ -21,7 +21,9 @@ app.include_router(router_favorite)
 
 try:
     app.mount(
-        "/static", StaticFiles(directory="../sneaker-frontend/build/static"), name="static"
+        "/static",
+        StaticFiles(directory="../sneaker-frontend/build/static"),
+        name="static",
     )
 except:
     logging.info("Not Serving Static Files")
