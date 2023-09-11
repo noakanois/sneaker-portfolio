@@ -93,14 +93,14 @@ Sneaker Portfolio is an interactive Website which allows you to track your shoe 
 - 
 ### Docker 🐳
 
- The application can also be run through docker. Run `docker-compose up` to start it on default port `8000`.
+We heavily encourage running the application through Docker. Run `docker-compose up` to start it on default port `8000`.
 
 
 
 ### Requirements
-For running the application, installing `Python 3.11`, `poetry`, `nodejs` and `npm` is necessary.
+If you want to run the application locally, installing `Python 3.11`, `poetry`, `nodejs` and `npm` is necessary.
 
-Using [conda](https://docs.conda.io/en/latest/) is heavily recommended for the Python setup.
+Using [conda](https://docs.conda.io/en/latest/) is recommended for the Python setup.
 
 
 
@@ -109,7 +109,7 @@ Using [conda](https://docs.conda.io/en/latest/) is heavily recommended for the P
 <details>
     <summary>Commands with conda
     </summary>
-    If you use a conda environment, run these additional commands before:
+    If you are using conda, run: 
 
 <ol>
     
