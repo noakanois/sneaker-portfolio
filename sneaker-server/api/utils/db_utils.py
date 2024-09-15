@@ -1,6 +1,6 @@
 import sqlite3
 
-DATABASE_PATH = "test.db"
+DATABASE_PATH = "shoes.db"
 
 
 def execute_sql(file_path):

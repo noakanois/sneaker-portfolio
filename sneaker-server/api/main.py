@@ -9,8 +9,8 @@ from api.routes.favorites import router_favorite
 import threading
 import os
 import sqlite3
-from api.db_utils import execute_sql, table_empty
-from api.img_utils import get_visuals_all_items
+from api.utils.db_utils import execute_sql, table_empty
+from api.utils.img_utils import get_visuals_all_items
 import logging
 
 app = FastAPI()

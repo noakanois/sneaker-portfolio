@@ -1,6 +1,6 @@
 from fastapi import APIRouter
-from ..db_utils import DATABASE_PATH
-from ..scrape import get_search_json
+from ..utils.db_utils import DATABASE_PATH
+from ..utils.scrape_utils import get_search_json
 import sqlite3
 import datetime
 import uuid

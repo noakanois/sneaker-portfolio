@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from ..db_utils import DATABASE_PATH
+from ..utils.db_utils import DATABASE_PATH
 import sqlite3
 from pydantic import BaseModel
 from typing import List

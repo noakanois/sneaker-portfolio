@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException
-from ..db_utils import DATABASE_PATH
+from ..utils.db_utils import DATABASE_PATH
 from pydantic import BaseModel
 import sqlite3
-from api.img_utils import get_visual_item
+from api.utils.img_utils import get_visual_item
 from multiprocessing import Process
 
 router_user = APIRouter()

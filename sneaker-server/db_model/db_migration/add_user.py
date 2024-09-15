@@ -1,6 +1,6 @@
 import sqlite3
 
-conn = sqlite3.connect("../../test.db")
+conn = sqlite3.connect("../../shoes.db")
 
 QUERY_INSERT_USER = """
     INSERT OR IGNORE INTO users ("name", "created_at", "updated_at")

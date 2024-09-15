@@ -20,7 +20,7 @@ QUERY_SHOES_2 = """
     );
 """
 
-conn = sqlite3.connect("../../test.db")
+conn = sqlite3.connect("../../shoes.db")
 df = pd.read_sql_query("SELECT * FROM shoes", conn)
 conn.cursor().execute(QUERY_SHOES_2)
 conn.commit()
